@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        function convertToJava() {
+            let data = document.getElementById('data').value;
+            let lines = data.split("\n");
+            let output = "";
+            output += "int[][]{\n";
+            for (let i = 0;i < 3;i++) {
+                output += "{" + lines[i].replace(/\t/g, ",") + "},\n";
+            }
+            output += "}\n";
+
+            let expected = lines[4].replace(/1/, "true").replace(/0/, "false").replace(/\t/, ",");
+            output += "boolean[]{" + expected + "};";
+
+            document.getElementById('output').value = output;
+        }
+        function convertArraysToJava() {
+            let data = document.getElementById('data').value;
+            let lines = data.split("\n");
+            let rawData = lines.map(line => line.split("\t"));
+            let output = "";
+
+            output += "int[][][] allData = new int[64][3][3];\n";
+            output += "boolean[][] allSpecs = new boolean[64][2];\n";
+            for (let i = 0;i < rawData[0].length;i+=3) {
+                const index = parseInt(i / 3);
+                output += "allData[" + index + "] = new int[][]{\n";
+                for (let j = 0;j < 4;j++) {
+                    let cols = rawData[j];
+                    let line = [ cols[i], cols[i + 1], cols[i + 2]];
+                    output += "{" + line.join(",") + "},\n";
+                }
+                output += "};\n";
+
+                let cols = rawData[4];
+                let expected = [cols[i], cols[i + 1]];
+                output += "allSpecs[" + index + "] = new boolean[]{" + expected.map(i => i == 1).join(",") + "};\n";
+            }
+
+
+            document.getElementById('output').value = output;
+
+        }
+    </script>
+</head>
+<body>
+<textarea id="data" cols="30" rows="10"></textarea>
+<input type="button" value="toJava" onclick="convertToJava()" />
+<input type="button" value="ArraystoJava" onclick="convertArraysToJava()" />
+<textarea id="output"  cols="30" rows="10"></textarea>
+</body>
+</html>
