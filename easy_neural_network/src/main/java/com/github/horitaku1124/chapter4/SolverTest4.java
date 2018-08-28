@@ -9,35 +9,36 @@ public class SolverTest4 {
     private static float[] hiddenThresholds;
     /** 出力層 */
     private static float[][] outputLayers;
-    /** 出力層-域値 */
+    /** 出力層-閾値 */
     private static float[] outputThresholds;
     public static void setupData() {
-        hiddenLayers = new float[3][3][4];
-        hiddenLayers[0] = new float[][] {
-                {0.0550f, 0.1660f, 0.1170f},
-                {0.0790f, 0.3330f, 0.1790f},
-                {0.1500f, 0.9230f, 0.1190f},
-                {0.9800f, 0.1110f, 0.1980f},
-        };
-        hiddenLayers[1] = new float[][] {
-                {0.0800f, 0.9120f, 0.1210f},
-                {0.2940f, 0.1760f, 0.2070f},
-                {0.3460f, 0.1200f, 0.2180f},
-                {0.1910f, 0.9720f, 0.0320f},
-        };
-        hiddenLayers[2] = new float[][] {
-                {0.9980f, 0.1640f, 0.9280f},
-                {0.8920f, 0.9730f, 0.1080f},
-                {0.9360f, 0.1170f, 0.0890f},
-                {0.0380f, 0.0640f, 0.1300f},
+        SolverTest4.hiddenLayers = new float[][][]{
+                {
+                        {0.0550f, 0.1660f, 0.1170f},
+                        {0.0790f, 0.3330f, 0.1790f},
+                        {0.1500f, 0.9230f, 0.1190f},
+                        {0.9800f, 0.1110f, 0.1980f},
+                },
+                {
+                        {0.0800f, 0.9120f, 0.1210f},
+                        {0.2940f, 0.1760f, 0.2070f},
+                        {0.3460f, 0.1200f, 0.2180f},
+                        {0.1910f, 0.9720f, 0.0320f},
+                },
+                {
+                        {0.0800f, 0.9120f, 0.1210f},
+                        {0.2940f, 0.1760f, 0.2070f},
+                        {0.3460f, 0.1200f, 0.2180f},
+                        {0.1910f, 0.9720f, 0.0320f},
+                }
         };
 
         hiddenThresholds = new float[]{0.9690f, 0.9170f, 0.9410f};
 
-
-        outputLayers = new float[2][3];
-        outputLayers[0] = new float[] {0.1810f, 0.9230f, 0.0610f};
-        outputLayers[1] = new float[] {0.9870f, 0.1010f, 0.8420f};
+        outputLayers = new float[][]{
+                {0.1810f, 0.9230f, 0.0610f},
+                {0.9870f, 0.1010f, 0.8420f}
+        };
 
         outputThresholds = new float[] {1.00f, 0.94f};
 
@@ -52,9 +53,9 @@ public class SolverTest4 {
         }
         return sb.toString();
     }
-    private static String convertToString(int[][] data) {
+    private static String convertToString(float[][] data) {
         StringBuilder sb = new StringBuilder();
-        for (int[] row : data) {
+        for (float[] row : data) {
             for (int i = 0;i < row.length;i++) {
                 sb.append(row[i]);
                 if (i < row.length - 1) {
@@ -98,11 +99,10 @@ public class SolverTest4 {
 
     public static void main(String[] args) {
         final int Loop = 2000;
-        final float Step = 0.2f;
+        final float Step = 0.1f;
         SolverTest4.setupData();
         System.out.println(targetFunction());
         for(int b = 0;b < 50;b++) {
-
             for (int i = 0;i < SolverTest4.hiddenLayers.length;i++) {
                 for (int j = 0;j < SolverTest4.hiddenLayers[i].length;j++) {
                     for (int k = 0;k < SolverTest4.hiddenLayers[i][j].length;k++) {
@@ -113,14 +113,20 @@ public class SolverTest4 {
                         float negativeError = targetFunction();
                         for(int a = 0;a < Loop;a++) {
                             float startError = targetFunction();
-                            if (negativeError < positiveError) {
+                            if (data < 0) {
+                                SolverTest4.hiddenLayers[i][j][k] = 0;
+                                break;
+                            } else if (negativeError < positiveError) {
                                 SolverTest4.hiddenLayers[i][j][k] = data - Step;
                             } else {
                                 SolverTest4.hiddenLayers[i][j][k] = data + Step;
                             }
                             float afterError = targetFunction();
                             if (startError < afterError - 0.01) {
+                                SolverTest4.hiddenLayers[i][j][k] = data;
                                 break;
+                            } else {
+                                data = SolverTest4.hiddenLayers[i][j][k];
                             }
                         }
                         System.out.println(targetFunction());
@@ -136,14 +142,20 @@ public class SolverTest4 {
                     float negativeError = targetFunction();
                     for(int a = 0;a < Loop;a++) {
                         float startError = targetFunction();
-                        if (negativeError < positiveError) {
+                        if (data < 0) {
+                            SolverTest4.outputLayers[i][j] = 0;
+                            break;
+                        } else if (negativeError < positiveError) {
                             SolverTest4.outputLayers[i][j] = data - Step;
                         } else {
                             SolverTest4.outputLayers[i][j] = data + Step;
                         }
                         float afterError = targetFunction();
                         if (startError < afterError - 0.01) {
+                            SolverTest4.outputLayers[i][j] = data;
                             break;
+                        } else {
+                            data = SolverTest4.outputLayers[i][j];
                         }
                     }
                     System.out.println(targetFunction());
@@ -157,14 +169,20 @@ public class SolverTest4 {
                 float negativeError = targetFunction();
                 for(int a = 0;a < Loop;a++) {
                     float startError = targetFunction();
-                    if (negativeError < positiveError) {
+                    if (data < 0) {
+                        SolverTest4.hiddenThresholds[i] = 0;
+                        break;
+                    } else if (negativeError < positiveError) {
                         SolverTest4.hiddenThresholds[i] = data - Step;
                     } else {
                         SolverTest4.hiddenThresholds[i] = data + Step;
                     }
                     float afterError = targetFunction();
                     if (startError < afterError - 0.01) {
+                        SolverTest4.hiddenThresholds[i] = data;
                         break;
+                    } else {
+                        data = SolverTest4.hiddenThresholds[i];
                     }
                 }
                 System.out.println(targetFunction());
@@ -177,20 +195,35 @@ public class SolverTest4 {
                 float negativeError = targetFunction();
                 for(int a = 0;a < Loop;a++) {
                     float startError = targetFunction();
-                    if (negativeError < positiveError) {
+                    if (data < 0) {
+                        SolverTest4.outputThresholds[i] = 0;
+                        break;
+                    } else if (negativeError < positiveError) {
                         SolverTest4.outputThresholds[i] = data - Step;
                     } else {
                         SolverTest4.outputThresholds[i] = data + Step;
                     }
                     float afterError = targetFunction();
                     if (startError < afterError - 0.01) {
+                        SolverTest4.outputThresholds[i] = data;
                         break;
+                    } else {
+                        data = SolverTest4.outputThresholds[i];
                     }
                 }
                 System.out.println(targetFunction());
             }
             System.out.println("b=" + b + " error=" + targetFunction());
+            if (targetFunction() < 0.01) {
+                break;
+            }
         }
         System.out.println("LastError=" + targetFunction());
+        System.out.println("hiddenLayers[0]=" + convertToString(SolverTest4.hiddenLayers[0]));
+        System.out.println("hiddenLayers[1]=" + convertToString(SolverTest4.hiddenLayers[1]));
+        System.out.println("hiddenLayers[2]=" + convertToString(SolverTest4.hiddenLayers[2]));
+        System.out.println("hiddenThresholds=" + convertToString(SolverTest4.hiddenThresholds));
+        System.out.println("outputLayers=" + convertToString(SolverTest4.outputLayers));
+        System.out.println("outputThresholds=" + convertToString(SolverTest4.outputThresholds));
     }
 }
