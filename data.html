@@ -15,7 +15,7 @@
             output += "}\n";
 
             let expected = lines[4].replace(/\t/, ",");
-            output += "boolean[]{" + expected + "};";
+            output += "float[]{" + expected + "};";
 
             document.getElementById('output').value = output;
         }
@@ -23,27 +23,29 @@
             let data = document.getElementById('data').value;
             let lines = data.split("\n");
             let rawData = lines.map(line => line.split("\t"));
-            let output = "";
+            let output1 = "";
+            let output2 = "";
 
-            output += "int[][][] inputLayers = new int[64][3][3];\n";
-            output += "float[][] layerAnswers = new float[64][2];\n";
+            output1 += "int[][][] inputLayers = {\n";
+            output2 += "float[][] answerLayers = {\n";
             for (let i = 0;i < rawData[0].length;i+=3) {
                 const index = parseInt(i / 3);
-                output += "inputLayers[" + index + "] = new int[][]{\n";
+                output1 += "{\n";
                 for (let j = 0;j < 4;j++) {
                     let cols = rawData[j];
                     let line = [ cols[i], cols[i + 1], cols[i + 2]];
-                    output += "{" + line.join(",") + "},\n";
+                    output1 += "{" + line.join(",") + "},\n";
                 }
-                output += "};\n";
+                output1 += "},\n";
 
                 let cols = rawData[4];
                 let expected = [cols[i], cols[i + 1]];
-                output += "layerAnswers[" + index + "] = new float[]{" + expected.join(",") + "};\n";
+                output2 += "{" + expected.join(",") + "},\n";
             }
+            output1 += "};\n";
+            output2 += "};\n";
 
-
-            document.getElementById('output').value = output;
+            document.getElementById('output').value = output1 + output2;
 
         }
     </script>
