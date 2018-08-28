@@ -25,11 +25,11 @@
             let rawData = lines.map(line => line.split("\t"));
             let output = "";
 
-            output += "int[][][] allData = new int[64][3][3];\n";
-            output += "boolean[][] allSpecs = new boolean[64][2];\n";
+            output += "int[][][] inputLayers = new int[64][3][3];\n";
+            output += "boolean[][] layerAnswers = new boolean[64][2];\n";
             for (let i = 0;i < rawData[0].length;i+=3) {
                 const index = parseInt(i / 3);
-                output += "allData[" + index + "] = new int[][]{\n";
+                output += "inputLayers[" + index + "] = new int[][]{\n";
                 for (let j = 0;j < 4;j++) {
                     let cols = rawData[j];
                     let line = [ cols[i], cols[i + 1], cols[i + 2]];
@@ -39,7 +39,7 @@
 
                 let cols = rawData[4];
                 let expected = [cols[i], cols[i + 1]];
-                output += "allSpecs[" + index + "] = new boolean[]{" + expected.map(i => i == 1).join(",") + "};\n";
+                output += "layerAnswers[" + index + "] = new boolean[]{" + expected.map(i => i == 1).join(",") + "};\n";
             }
 
 
