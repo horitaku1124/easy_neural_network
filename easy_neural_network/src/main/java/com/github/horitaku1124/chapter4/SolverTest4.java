@@ -158,36 +158,25 @@ public class SolverTest4 {
 
 
     public static void main(String[] args) {
-        final int Loop = 2000;
+        final int Loop = 5000;
         final float Step = 0.1f;
+        final float h = 0.0001f;
         SolverTest4.setupData();
         System.out.println(targetFunction());
-        for(int b = 0;b < 50;b++) {
+        for(int b = 0;b < Loop;b++) {
             for (long i = 0;i < allLength;i++) {
                 float data = get(i);
-                set(i, data + 1);
-                float positiveError = targetFunction();
-                set(i, data - 1);
-                float negativeError = targetFunction();
-                for(int a = 0;a < Loop;a++) {
-                    float startError = targetFunction();
-                    if (data < 0) {
-                        set(i, 0);
-                        break;
-                    } else if (negativeError < positiveError) {
-                        set(i, data - Step);
-                    } else {
-                        set(i, data + Step);
-                    }
-                    float afterError = targetFunction();
-                    if (startError < afterError - 0.01) {
-                        set(i, data);
-                        break;
-                    } else {
-                        data = get(i);
-                    }
-                }
-                System.out.println(targetFunction());
+
+                float baseError = targetFunction();
+                set(i, data + h);
+                float nextError = targetFunction();
+                float dxdy = (nextError - baseError) / h;
+                data = data - Step * dxdy;
+//                if(data < 0) {
+//                    data = 0;
+//                }
+                set(i, data);
+//                System.out.println(dxdy);
             }
             System.out.println("b=" + b + " error=" + targetFunction());
             if (targetFunction() < 0.01) {
