@@ -29,7 +29,6 @@
             output1 += "int[][][] inputLayers = {\n";
             output2 += "float[][] answerLayers = {\n";
             for (let i = 0;i < rawData[0].length;i+=3) {
-                const index = parseInt(i / 3);
                 output1 += "{\n";
                 for (let j = 0;j < 4;j++) {
                     let cols = rawData[j];
@@ -48,12 +47,50 @@
             document.getElementById('output').value = output1 + output2;
 
         }
+        function convertArraysToJava2() {
+            const width = 9;
+            const height = 9;
+            let data = document.getElementById('data').value;
+            let lines = data.split("\n");
+            let rawData = lines.map(line => line.split("\t"));
+            let output1 = "";
+            let output2 = "";
+
+            // output1 += "float[][][] inputLayers = {\n";
+            const widthLength = parseInt(rawData[0].length / width);
+            output1 += `float[][][] inputLayers = new float[${widthLength}][${width}][${height}];\n`;
+            output2 += "float[][] answerLayers = {\n";
+            for (let i = 0;i < rawData[0].length;i += width) {
+                // output1 += "{\n";
+                output1 += `inputLayers[${parseInt(i / width)}] = new float[][] {\n`;
+                for (let j = 0;j < height;j++) {
+                    let cols = rawData[j];
+                    let line = [];
+                    for (let k = 0;k < width;k++) {
+                        line.push(cols[i + k] + "f");
+                    }
+                    // output1 += "{" + line.join(",") + "},\n";
+                    output1 += "{" + line.join(",") + "},\n";
+                }
+                output1 += "};\n";
+
+                let cols = rawData[height];
+                let expected = [cols[i], cols[i + 1]];
+                output2 += "{" + expected.join(",") + "},\n";
+            }
+            output1 += "};\n";
+            output2 += "};\n";
+
+            document.getElementById('output').value = output1 + output2;
+
+        }
     </script>
 </head>
 <body>
 <textarea id="data" cols="30" rows="10"></textarea>
 <input type="button" value="toJava" onclick="convertToJava()" />
 <input type="button" value="ArraystoJava" onclick="convertArraysToJava()" />
+<input type="button" value="ArraystoJava2" onclick="convertArraysToJava2()" />
 <textarea id="output"  cols="30" rows="10"></textarea>
 </body>
 </html>
