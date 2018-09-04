@@ -25,11 +25,12 @@ public class SolverTest5 {
     /** 出力層 - θ */
     private static float[] outputTheta;
 
-    static int w1;
-    static int w2 ;
-    static int w3;
-    static int w11;
-    static long hiddenLength;
+    static int w1, w2, w3, w4;
+    static int x1, x2, x3;
+    static int o11, o12, o13, o14;
+    static int o21, o22, o23, o24;
+    static long convolutionLength, output1Length, output2Length;
+
     static long allLength;
 
 
@@ -129,17 +130,107 @@ public class SolverTest5 {
 
         outputTheta = new float[]{2.48f, 2.27f};
 
+        w1 = convolutionFilters[0][0].length;
+        w2 = convolutionFilters[0].length;
+        w3 = convolutionFilters.length;
+        w4 = w1 * w2;
+        x1 = outputLayer1[0][0].length;
+        x2 = outputLayer1[0].length;
+        x3 = outputLayer1.length;
+        convolutionLength = w4 * w3;
+        o11 = outputLayer1[0][0].length;
+        o12 = outputLayer1[0].length;
+        o13 = outputLayer1.length;
+        o14 = o11 * o12;
+        output1Length = o14 * o13;
+        o21 = outputLayer2[0][0].length;
+        o22 = outputLayer2[0].length;
+        o23 = outputLayer2.length;
+        o24 = o21 * o22;
+        output2Length = o24 * o23;
 
-
-//        w1 = convolutionFilters[0][0].length;
-//        w2 = convolutionFilters[0].length;
-//        w3 = w1 * w2;
-//        w11 = outputLayers.length * outputLayers[0].length;
-//        hiddenLength = w3 * convolutionFilters.length;
-//        allLength = hiddenLength + hiddenThresholds.length + w11 + outputThresholds.length;
+        allLength = convolutionLength
+                + convolutionTheta.length
+                + o14 * o13
+                + o24 * o23
+                + outputTheta.length;
     }
-    public static void main(String[] args) {
-        setupData();
+
+    public static void set(long index, float value) {
+        float[][][] hl = SolverTest5.convolutionFilters;
+        if (index < convolutionLength) {
+            int x = (int) (index / w4);
+            int y = (int) ((index - (x * w4)) / w2);
+            int z = (int) (index % w2);
+            hl[x][y][z] = value;
+            return;
+        }
+        if (index < convolutionLength + convolutionTheta.length) {
+            convolutionTheta[(int) (index - convolutionLength)] = value;
+            return;
+        }
+        long nextIndex = convolutionLength + convolutionTheta.length;
+        if (index < nextIndex + output1Length) {
+            index = index - nextIndex;
+            int x = (int) (index / o14);
+            int y = (int) ((index - (x * o14)) / o12);
+            int z = (int) (index % o12);
+
+            outputLayer1[x][y][z] = value;
+            return;
+        }
+        nextIndex += output1Length;
+
+        if (index < nextIndex + output2Length) {
+            index = index - nextIndex;
+            int x = (int) (index / o24);
+            int y = (int) ((index - (x * o24)) / o22);
+            int z = (int) (index % o22);
+
+            outputLayer2[x][y][z] = value;
+            return;
+        }
+        nextIndex += output2Length;
+        int lastIndex = (int) (index - nextIndex);
+        outputTheta[lastIndex] = value;
+    }
+    public static float get(long index) {
+        float[][][] hl = SolverTest5.convolutionFilters;
+        if (index < convolutionLength) {
+            int x = (int) (index / w4);
+            int y = (int) ((index - (x * w4)) / w2);
+            int z = (int) (index % w2);
+            return hl[x][y][z];
+        }
+        if (index < convolutionLength + convolutionTheta.length) {
+            return convolutionTheta[(int) (index - convolutionLength)];
+        }
+        long nextIndex = convolutionLength + convolutionTheta.length;
+        if (index < nextIndex + output1Length) {
+            index = index - nextIndex;
+            int x = (int) (index / o14);
+            int y = (int) ((index - (x * o14)) / o12);
+            int z = (int) (index % o12);
+
+            return outputLayer1[x][y][z];
+        }
+        nextIndex += output1Length;
+
+        if (index < nextIndex + output2Length) {
+            index = index - nextIndex;
+            int x = (int) (index / o24);
+            int y = (int) ((index - (x * o24)) / o22);
+            int z = (int) (index % o22);
+
+            return outputLayer2[x][y][z];
+        }
+        nextIndex += output2Length;
+        int lastIndex = (int) (index - nextIndex);
+        return outputTheta[lastIndex];
+    }
+
+    public static float targetFunction() {
+
         // 6x6の畳み込み層を3層、入力層分用意
         float[][][][] convolutions = new float[inputLayers.length][3][6][6];
 
@@ -196,7 +287,33 @@ public class SolverTest5 {
             float q = CalculationFunctions.SUMXMY2(answerLayers[input], output[input]);
             Q0 += q;
         }
+        return Q0;
+    }
 
-        System.out.println(Q0);
+    public static void main(String[] args) {
+        final int Loop = 5000;
+        final float Step = 0.1f;
+        final float h = 0.001f;
+        setupData();
+
+        for(int b = 0;b < Loop;b++) {
+            for (long i = 0;i < allLength;i++) {
+                float data = get(i);
+
+                float baseError = targetFunction();
+                set(i, data + h);
+                float nextError = targetFunction();
+                float dxdy = (nextError - baseError) / h;
+//                System.out.println("dxdy=" + dxdy);
+                data = data - Step * dxdy;
+                set(i, data);
+            }
+            System.out.println("b=" + b + " error=" + targetFunction());
+            if (targetFunction() < 0.01) {
+                break;
+            }
+        }
+
+        System.out.println(targetFunction());
     }
 }
