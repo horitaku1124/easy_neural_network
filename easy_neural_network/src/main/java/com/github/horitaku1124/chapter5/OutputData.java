@@ -28,7 +28,7 @@ public class OutputData {
     int o21, o22, o23, o24;
     long convolutionLength, output1Length, output2Length;
 
-    static long allLength;
+    long allLength;
 
     public OutputData(String filePath) {
 

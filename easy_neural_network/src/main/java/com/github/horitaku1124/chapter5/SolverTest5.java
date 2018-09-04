@@ -1,6 +1,5 @@
 package com.github.horitaku1124.chapter5;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.horitaku1124.util.CalculationFunctions;
 
@@ -17,7 +16,7 @@ import static java.lang.Math.max;
 public class SolverTest5 {
     private static OutputData resultData;
 
-    public static float targetFunction() {
+    private static float targetFunction() {
 
         // 6x6の畳み込み層を3層、入力層分用意
         float[][][][] convolutions = new float[inputLayers.length][3][6][6];
