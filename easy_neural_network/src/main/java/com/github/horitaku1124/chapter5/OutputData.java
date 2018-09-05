@@ -20,8 +20,6 @@ public class OutputData {
     /** 出力層 - θ */
     public float[] outputTheta;
 
-    public OutputData() {}
-
     int w1, w2, w3, w4;
     int x1, x2, x3;
     int o11, o12, o13, o14;
@@ -30,41 +28,80 @@ public class OutputData {
 
     long allLength;
 
-    public OutputData(String filePath) {
-
-        final int width = 9;
-        final int height = 9;
-        List<String[]> lines = new ArrayList<>();
-        try (FileReader fr = new FileReader(filePath);
-             BufferedReader br = new BufferedReader(fr)) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] row = line.split("\t");
-                // process the line.
-                lines.add(row);
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+    public void set(long index, float value) {
+        float[][][] hl = convolutionFilters;
+        if (index < convolutionLength) {
+            int x = (int) (index / w4);
+            int y = (int) ((index - (x * w4)) / w2);
+            int z = (int) (index % w2);
+            hl[x][y][z] = value;
+            return;
         }
-        int inputLength = lines.get(0).length / width;
-        InputData.inputLayers = new float[inputLength][width][height];
-        InputData.answerLayers = new float[inputLength][2];
-
-        int index = 0;
-        for (int i = 0;i < lines.get(0).length;i += width,index++) {
-            for (int j = 0;j < height;j++) {
-                String[] row = lines.get(j);
-                for (int k = 0;k < width;k++) {
-                    InputData.inputLayers[index][j][k] = Float.parseFloat(row[k + i]);
-                }
-
-            }
-            String[] lastLine = lines.get(lines.size() - 1);
-            InputData.answerLayers[index][0] = Float.parseFloat(lastLine[i]);
-            InputData.answerLayers[index][1] = Float.parseFloat(lastLine[i + 1]);
+        if (index < convolutionLength + convolutionTheta.length) {
+            convolutionTheta[(int) (index - convolutionLength)] = value;
+            return;
         }
+        long nextIndex = convolutionLength + convolutionTheta.length;
+        if (index < nextIndex + output1Length) {
+            index = index - nextIndex;
+            int x = (int) (index / o14);
+            int y = (int) ((index - (x * o14)) / o12);
+            int z = (int) (index % o12);
 
+            outputLayer1[x][y][z] = value;
+            return;
+        }
+        nextIndex += output1Length;
 
+        if (index < nextIndex + output2Length) {
+            index = index - nextIndex;
+            int x = (int) (index / o24);
+            int y = (int) ((index - (x * o24)) / o22);
+            int z = (int) (index % o22);
+
+            outputLayer2[x][y][z] = value;
+            return;
+        }
+        nextIndex += output2Length;
+        int lastIndex = (int) (index - nextIndex);
+        outputTheta[lastIndex] = value;
+    }
+    public float get(long index) {
+        float[][][] hl = convolutionFilters;
+        if (index < convolutionLength) {
+            int x = (int) (index / w4);
+            int y = (int) ((index - (x * w4)) / w2);
+            int z = (int) (index % w2);
+            return hl[x][y][z];
+        }
+        if (index < convolutionLength + convolutionTheta.length) {
+            return convolutionTheta[(int) (index - convolutionLength)];
+        }
+        long nextIndex = convolutionLength + convolutionTheta.length;
+        if (index < nextIndex + output1Length) {
+            index = index - nextIndex;
+            int x = (int) (index / o14);
+            int y = (int) ((index - (x * o14)) / o12);
+            int z = (int) (index % o12);
+
+            return outputLayer1[x][y][z];
+        }
+        nextIndex += output1Length;
+
+        if (index < nextIndex + output2Length) {
+            index = index - nextIndex;
+            int x = (int) (index / o24);
+            int y = (int) ((index - (x * o24)) / o22);
+            int z = (int) (index % o22);
+
+            return outputLayer2[x][y][z];
+        }
+        nextIndex += output2Length;
+        int lastIndex = (int) (index - nextIndex);
+        return outputTheta[lastIndex];
+    }
+
+    public void initializeData() {
         convolutionFilters = new float[][][] {
                 {
                         {1.0f, 1.0f, 1.0f, 1.0f},
@@ -151,78 +188,5 @@ public class OutputData {
                 + o14 * o13
                 + o24 * o23
                 + outputTheta.length;
-    }
-
-    public void set(long index, float value) {
-        float[][][] hl = convolutionFilters;
-        if (index < convolutionLength) {
-            int x = (int) (index / w4);
-            int y = (int) ((index - (x * w4)) / w2);
-            int z = (int) (index % w2);
-            hl[x][y][z] = value;
-            return;
-        }
-        if (index < convolutionLength + convolutionTheta.length) {
-            convolutionTheta[(int) (index - convolutionLength)] = value;
-            return;
-        }
-        long nextIndex = convolutionLength + convolutionTheta.length;
-        if (index < nextIndex + output1Length) {
-            index = index - nextIndex;
-            int x = (int) (index / o14);
-            int y = (int) ((index - (x * o14)) / o12);
-            int z = (int) (index % o12);
-
-            outputLayer1[x][y][z] = value;
-            return;
-        }
-        nextIndex += output1Length;
-
-        if (index < nextIndex + output2Length) {
-            index = index - nextIndex;
-            int x = (int) (index / o24);
-            int y = (int) ((index - (x * o24)) / o22);
-            int z = (int) (index % o22);
-
-            outputLayer2[x][y][z] = value;
-            return;
-        }
-        nextIndex += output2Length;
-        int lastIndex = (int) (index - nextIndex);
-        outputTheta[lastIndex] = value;
-    }
-    public float get(long index) {
-        float[][][] hl = convolutionFilters;
-        if (index < convolutionLength) {
-            int x = (int) (index / w4);
-            int y = (int) ((index - (x * w4)) / w2);
-            int z = (int) (index % w2);
-            return hl[x][y][z];
-        }
-        if (index < convolutionLength + convolutionTheta.length) {
-            return convolutionTheta[(int) (index - convolutionLength)];
-        }
-        long nextIndex = convolutionLength + convolutionTheta.length;
-        if (index < nextIndex + output1Length) {
-            index = index - nextIndex;
-            int x = (int) (index / o14);
-            int y = (int) ((index - (x * o14)) / o12);
-            int z = (int) (index % o12);
-
-            return outputLayer1[x][y][z];
-        }
-        nextIndex += output1Length;
-
-        if (index < nextIndex + output2Length) {
-            index = index - nextIndex;
-            int x = (int) (index / o24);
-            int y = (int) ((index - (x * o24)) / o22);
-            int z = (int) (index % o22);
-
-            return outputLayer2[x][y][z];
-        }
-        nextIndex += output2Length;
-        int lastIndex = (int) (index - nextIndex);
-        return outputTheta[lastIndex];
     }
 }

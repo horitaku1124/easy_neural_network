@@ -3,9 +3,8 @@ package com.github.horitaku1124.chapter5;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.horitaku1124.util.CalculationFunctions;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,8 +12,8 @@ import static com.github.horitaku1124.chapter5.InputData.answerLayers;
 import static com.github.horitaku1124.chapter5.InputData.inputLayers;
 import static java.lang.Math.max;
 
-public class SolverTest5 {
-    private static OutputData resultData;
+public class Train5 {
+    public static OutputData resultData;
 
     private static float targetFunction() {
 
@@ -77,11 +76,48 @@ public class SolverTest5 {
         return Q0;
     }
 
+    public static void setupInputData(String filePath) {
+        final int width = 9;
+        final int height = 9;
+
+        List<String[]> lines = new ArrayList<>();
+        try (FileReader fr = new FileReader(filePath);
+             BufferedReader br = new BufferedReader(fr)) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] row = line.split("\t");
+                // process the line.
+                lines.add(row);
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        int inputLength = lines.get(0).length / width;
+        InputData.inputLayers = new float[inputLength][width][height];
+        InputData.answerLayers = new float[inputLength][2];
+
+        int index = 0;
+        for (int i = 0;i < lines.get(0).length;i += width,index++) {
+            for (int j = 0;j < height;j++) {
+                String[] row = lines.get(j);
+                for (int k = 0;k < width;k++) {
+                    InputData.inputLayers[index][j][k] = Float.parseFloat(row[k + i]);
+                }
+
+            }
+            String[] lastLine = lines.get(lines.size() - 1);
+            InputData.answerLayers[index][0] = Float.parseFloat(lastLine[i]);
+            InputData.answerLayers[index][1] = Float.parseFloat(lastLine[i + 1]);
+        }
+    }
+
     public static void main(String[] args) throws IOException {
-        final int Loop = 100;
+        final int Loop = 1000;
         final float Step = 0.1f;
-        final float h = 0.001f;
-        resultData = new OutputData("./data1.txt");
+        final float h = 0.0005f;
+        setupInputData("./data1.txt");
+        resultData = new OutputData();
+        resultData.initializeData();
 
         for(int b = 0;b < Loop;b++) {
             for (long i = 0;i < resultData.allLength;i++) {
@@ -105,7 +141,7 @@ public class SolverTest5 {
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(resultData);
 
-        try (FileWriter filewriter = new FileWriter(new File("result.json"), true);) {
+        try (FileWriter filewriter = new FileWriter(new File("result.json"))) {
             filewriter.write(json);
         }
 
