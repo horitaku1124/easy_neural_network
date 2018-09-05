@@ -85,6 +85,7 @@ public class Test5 {
             }
             float q = CalculationFunctions.SUMXMY2(answerLayers[input], output[input]);
             Q0 += q;
+//            System.out.println("Anser=" + maxIndex(answerLayers[input]) + " res=" + maxIndex(output[input]));
             if (maxIndex(answerLayers[input]) == maxIndex(output[input])) {
                 correct++;
             }
@@ -97,7 +98,7 @@ public class Test5 {
     private static int maxIndex(float[] array) {
         int index = 0;
         float max = 0;
-        for (int i = 1;i < array.length;i++) {
+        for (int i = 0;i < array.length;i++) {
             if (max < array[i]) {
                 max = array[i];
                 index = i;

@@ -1,12 +1,5 @@
 package com.github.horitaku1124.chapter5;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class OutputData {
 
     /** 畳み込み層 - フィルター */

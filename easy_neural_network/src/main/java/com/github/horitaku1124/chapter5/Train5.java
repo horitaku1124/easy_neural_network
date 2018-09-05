@@ -112,9 +112,9 @@ public class Train5 {
     }
 
     public static void main(String[] args) throws IOException {
-        final int Loop = 1000;
-        final float Step = 0.1f;
-        final float h = 0.0005f;
+        final int Loop = 100;
+        final float Step = 0.2f;
+        final float h = 0.01f;
         setupInputData("./data1.txt");
         resultData = new OutputData();
         resultData.initializeData();
@@ -122,14 +122,13 @@ public class Train5 {
         for(int b = 0;b < Loop;b++) {
             for (long i = 0;i < resultData.allLength;i++) {
                 float data = resultData.get(i);
-
                 float baseError = targetFunction();
                 resultData.set(i, data + h);
                 float nextError = targetFunction();
                 float dxdy = (nextError - baseError) / h;
-//                System.out.println("dxdy=" + dxdy);
                 data = data - Step * dxdy;
                 resultData.set(i, data);
+//                System.out.println("baseError=" + baseError + " nextError=" + nextError + " data=" + data);
             }
             System.out.println("b=" + b + " error=" + targetFunction());
             if (targetFunction() < 0.01) {
