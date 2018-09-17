@@ -14,6 +14,15 @@ public class MyNumArray {
         shape = shapeDefinition;
         internalData = new float[(int) size];
     }
+
+    public int size() {
+        return (int)size;
+    }
+
+    public int layerLength(int dimension) {
+        return shape[dimension];
+    }
+
     public void dataCopy(byte[] data) {
         dataCopy(data, 0);
     }
@@ -24,20 +33,26 @@ public class MyNumArray {
     }
 
     public int offsetToIndex(int... offset) {
+        int index = -1;
         if (ndim == 1) {
-            return offset[0];
+            index = offset[0];
         } else if (ndim == 2) {
-            return offset[0] * shape[1] + offset[1];
+            index = offset[0] * shape[1] + offset[1];
         } else if (ndim == 3) {
-            return offset[0] * shape[1] * shape[2] + offset[1] * shape[2] + offset[2];
+            index = offset[0] * shape[1] * shape[2] + offset[1] * shape[2] + offset[2];
         } else if (ndim == 4) {
-            return
-                    offset[0] * shape[1] * shape[2] * shape[3] +
+            index = offset[0] * shape[1] * shape[2] * shape[3] +
                     offset[1] * shape[2] * shape[3] +
                     offset[2] * shape[3] +
                     offset[3];
         }
-        return -1;
+        if (index >= internalData.length) {
+            for (int i = 0;i < offset.length;i++) {
+                System.out.println("offset[" + i + "]=" + offset[i]);
+            }
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
+        return index;
     }
 
     public void set(float value, int... offset) {
@@ -46,5 +61,16 @@ public class MyNumArray {
 
     public float get(int... offset) {
         return internalData[offsetToIndex(offset)];
+    }
+
+    public float SUMXMY2(MyNumArray target, int arrayIndex) {
+        int thisOffset = arrayIndex * shape[1];
+        int thatOffset = arrayIndex * target.shape[1];
+        int limit = shape[1];
+        float sum = 0;
+        for (int i = 0;i < limit;i++) {
+            sum += Math.pow(internalData[i + thisOffset] - target.internalData[i + thatOffset], 2);
+        }
+        return sum;
     }
 }
