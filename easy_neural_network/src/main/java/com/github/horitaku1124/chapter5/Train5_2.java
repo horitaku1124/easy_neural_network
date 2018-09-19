@@ -44,23 +44,23 @@ public class Train5_2 {
             for (int f = 0; f < 3; f++) {
                 for(int i = 0;i < 3;i++) {
                     for (int j = 0; j < 3; j++) {
-                        float f1 = convolutions2.get(input, f, i * 2, i * 2);
+                        float f1 = convolutions2.get(input, f, i * 2, j * 2);
                         float f2 = convolutions2.get(input, f, i * 2, j * 2 + 1);
                         float f3 = convolutions2.get(input, f, i * 2 + 1, j * 2);
                         float f4 = convolutions2.get(input, f, i * 2 + 1, j * 2 + 1);
-                        pooling2.set(max(max(f1, f2), max(f3, f4)),
+                        float max = max(max(f1, f2), max(f3, f4));
+                        pooling2.set(max,
                                 input, f, i, j);
                     }
                 }
             }
         }
 
-
         // 出力層
         MyNumArray output2 = new MyNumArray(inputSize, 2);
         float Q0 = 0;
+        List<float[][][]> outputLayers = Arrays.asList(resultData.outputLayer1, resultData.outputLayer2);
         for (int input = 0;input < inputSize;input++) {
-            List<float[][][]> outputLayers = Arrays.asList(resultData.outputLayer1, resultData.outputLayer2);
             for (int z = 0;z < outputLayers.size();z++) {
                 float sum = 0;
                 for (int f = 0;f < 3;f++) {
