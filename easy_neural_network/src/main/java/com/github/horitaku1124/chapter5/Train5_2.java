@@ -11,7 +11,7 @@ import java.util.List;
 import static java.lang.Math.max;
 
 public class Train5_2 {
-    public static OutputData resultData;
+    public static OutputData2 resultData;
 
     private static float targetFunction(final InputData2 inputData) {
 
@@ -27,10 +27,10 @@ public class Train5_2 {
                         float sum = 0;
                         for(int x = 0;x < 4;x++) {
                             for (int y = 0;y < 4;y++) {
-                                sum += inputData.inputLayers.get(input, x + i, y + j) * resultData.convolutionFilters[f][x][y];
+                                sum += inputData.inputLayers.get(input, x + i, y + j) * resultData.convolutionFilters.get(f, x, y);
                             }
                         }
-                        convolutions2.set(max(0.0f, sum - resultData.convolutionTheta[f]),
+                        convolutions2.set(max(0.0f, sum - resultData.convolutionTheta.get(f)),
                                 input, f, i, j
                         );
                     }
@@ -59,18 +59,18 @@ public class Train5_2 {
         // 出力層
         MyNumArray output2 = new MyNumArray(inputSize, 2);
         float Q0 = 0;
-        List<float[][][]> outputLayers = Arrays.asList(resultData.outputLayer1, resultData.outputLayer2);
+        List<MyNumArray> outputLayers = Arrays.asList(resultData.outputLayer1, resultData.outputLayer2);
         for (int input = 0;input < inputSize;input++) {
             for (int z = 0;z < outputLayers.size();z++) {
                 float sum = 0;
                 for (int f = 0;f < 3;f++) {
                     for(int i = 0;i < 3;i++) {
                         for(int j = 0;j < 3;j++) {
-                            sum += outputLayers.get(z)[f][i][j] * pooling2.get(input, f, i, j);
+                            sum += outputLayers.get(z).get(f, i, j) * pooling2.get(input, f, i, j);
                         }
                     }
                 }
-                output2.set((float) (1 / (1 + Math.exp(resultData.outputTheta[z] - sum))),
+                output2.set((float) (1 / (1 + Math.exp(resultData.outputTheta.get(z) - sum))),
                         input, z
                 );
             }
@@ -125,7 +125,7 @@ public class Train5_2 {
         final float Step = 0.2f;
         final float h = 0.01f;
         InputData2 inputData = setupInputData("./data1.txt");
-        resultData = new OutputData();
+        resultData = new OutputData2();
         resultData.initializeData();
 
         for(int b = 0;b < Loop;b++) {

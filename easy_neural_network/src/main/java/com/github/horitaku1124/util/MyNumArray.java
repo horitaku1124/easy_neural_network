@@ -5,6 +5,48 @@ public class MyNumArray {
     public long size;
     public int[] shape;
     public float[] internalData;
+
+    public MyNumArray(float[] data) {
+        ndim = 1;
+        size = data.length;
+        shape = new int[data.length];
+        internalData = new float[(int) size];
+        int index = 0;
+        for (float aData : data) {
+            internalData[index] = aData;
+            index++;
+        }
+    }
+    public MyNumArray(float[][] data) {
+        ndim = 2;
+        size = data.length * data[0].length;
+        internalData = new float[(int) size];
+        shape = new int[] {data.length, data[0].length};
+        int index = 0;
+        for (float[] aData : data) {
+            for (float anAData : aData) {
+                internalData[index] = anAData;
+                index++;
+            }
+        }
+    }
+
+    public MyNumArray(float[][][] data) {
+        ndim = 3;
+        size = data.length * data[0].length * data[0][0].length;
+        shape = new int[] {data.length, data[0].length, data[0][0].length};
+        internalData = new float[(int) size];
+        int index = 0;
+        for (float[][] aData : data) {
+            for (float[] anAData : aData) {
+                for (float anAnAData : anAData) {
+                    internalData[index] = anAnAData;
+                    index++;
+                }
+            }
+        }
+    }
+
     public MyNumArray(int... shapeDefinition) {
         ndim = shapeDefinition.length;
         size = 1;
