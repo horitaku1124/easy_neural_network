@@ -5,6 +5,7 @@ public class MyNumArray {
     public long size;
     public int[] shape;
     public float[] internalData;
+    public MyNumArray() {}
 
     public MyNumArray(float[] data) {
         ndim = 1;

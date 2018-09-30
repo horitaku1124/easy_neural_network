@@ -22,6 +22,8 @@ public class OutputData2 {
 
     long allLength;
 
+    public OutputData2() {}
+
     public void set(long index, float value) {
         long offset = index;
         for (int i = 0;i < allData.size();i++) {
