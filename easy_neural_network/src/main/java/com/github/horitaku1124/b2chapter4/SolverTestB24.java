@@ -2,6 +2,9 @@ package com.github.horitaku1124.b2chapter4;
 
 import com.github.horitaku1124.util.MyNumArray;
 
+import java.util.stream.IntStream;
+import static java.util.stream.IntStream.range;
+
 import static java.lang.System.out;
 
 public class SolverTestB24 {
@@ -48,14 +51,17 @@ public class SolverTestB24 {
     }
 
     public static float targetFunction() {
-        MyNumArray SigmaArray = new MyNumArray(
-                InputData.inputLayers.layerLength(0),
-                hiddenLayers.layerLength(0));
+        int inputLength = InputData.inputLayers.layerLength(0);
+        MyNumArray SigmaArray = new MyNumArray(inputLength, hiddenLayers.layerLength(0));
+        MyNumArray dCda3Array = new MyNumArray(inputLength, outputLayers.layerLength(0));
+        MyNumArray dCda3δ3Array = new MyNumArray(inputLength, outputLayers.layerLength(0));
+
+        MyNumArray globalA2array =  new MyNumArray(inputLength, hiddenLayers.layerLength(0));
         int page;
         page = 1;
-        int inputLenght = InputData.inputLayers.layerLength(0);
-        for (int l = 0;l < inputLenght;l++) {
-            out.println("page=" + page);
+        float totalErrorC = 0;
+        for (int l = 0;l < inputLength;l++) {
+//            out.println("page=" + page);
             // 変数値算出
 //            l = 63;
             MyNumArray a2array =  new MyNumArray(hiddenLayers.layerLength(0));
@@ -66,10 +72,11 @@ public class SolverTestB24 {
                 z2 += hiddenBiases.get(i);
 //                out.print(z2);
 //                out.print(",");
-                float a2 = calculateOutputA(z2);
+                float a2 = calculateOutputA(z2); // a2i
                 a2array.set(a2, i);
-                float a22 = a2 * (1 - a2);
-                az2array.set(a22, i);
+                globalA2array.set(a2, l, i);
+                float az2 = a2 * (1 - a2); // a'(z2i)
+                az2array.set(az2, i);
 //                System.out.print(z2 + " ");
             }
 //            out.println("");
@@ -77,6 +84,7 @@ public class SolverTestB24 {
             MyNumArray z3array = new MyNumArray(outputLayers.layerLength(0));
             MyNumArray a3array = new MyNumArray(outputLayers.layerLength(0));
             MyNumArray s3array = new MyNumArray(outputLayers.layerLength(0));
+            MyNumArray az3array = new MyNumArray(outputLayers.layerLength(0));
             float C = 0;
             for (int i = 0;i < outputLayers.layerLength(0);i++) {
                 float z3 = a2array.sumProductRank1x2(outputLayers, i) + outputBiases.get(i);
@@ -84,6 +92,7 @@ public class SolverTestB24 {
                 float a3 = calculateOutputA(z3);
                 float az3 = a3 * (1 - a3);
                 a3array.set(a3, i);
+                az3array.set(az3, i);
                 float c = InputData.answerLayers.get(l, i) - a3;
 
                 // δ算出
@@ -101,9 +110,22 @@ public class SolverTestB24 {
 //                out.print(sigma);
 //                out.print(", ");
             }
+            totalErrorC += C;
 //            out.println("");
 
 //            System.out.println(" C=" + C);
+
+            // δ算出
+            // 出力層
+            for (int i = 0;i < outputLayers.layerLength(0);i++) {
+                // ∂C/∂a3
+                float value = a3array.get(i) - InputData.answerLayers.get(l, i);
+                dCda3Array.set(value, l, i); // TODO no need to store?
+                float sigma = value * az3array.get(i); // δ3
+//                out.println(sigma);
+                dCda3δ3Array.set(sigma, l, i);
+            }
+
             page += 4;
 //            System.out.println("");
         }
@@ -115,16 +137,16 @@ public class SolverTestB24 {
                 hiddenLayers.layerLength(1),
                 hiddenLayers.layerLength(2)
         );
-        // 隠れ層
+        // 2乗誤差の偏微分 隠れ層
         page = 0;
-        for (int l = 0;l < InputData.inputLayers.layerLength(0);l++) {
+        for (int l = 0;l < inputLength;l++) {
             for (int i = 0; i < hiddenLayers.layerLength(0); i++) {
                 float sigma = SigmaArray.get(l, i);
 //                out.println(page);
                 for (int j = 0; j < hiddenLayers.layerLength(1); j++) {
                     for (int k = 0; k < hiddenLayers.layerLength(2); k++) {
                         float answer = InputData.inputLayers.get(l, j, k);
-                        float value = sigma * answer;
+                        float value = sigma * answer; // ∂C/∂w
                         // ∂C/∂w
                         partialDeviationError.set(value, l, i, j, k);
 //                        out.print(value);
@@ -133,23 +155,56 @@ public class SolverTestB24 {
 //                    out.println("");
                 }
                 page += 1;
-//                System.out.println(" -- ");
+//                out.println(" -- ");
             }
             page += 1;
         }
 
+        // 隠れ層.勾配 ∂CT/∂w
+        MyNumArray hiddenLayerDecent = new MyNumArray(
+                hiddenLayers.layerLength(0),
+                hiddenLayers.layerLength(1),
+                hiddenLayers.layerLength(2)
+        );
         for (int i = 0; i < hiddenLayers.layerLength(0); i++) {
             for (int j = 0; j < hiddenLayers.layerLength(1); j++) {
                 for (int k = 0; k < hiddenLayers.layerLength(2); k++) {
                     float sum = 0;
-                    for (int l = 0;l < InputData.inputLayers.layerLength(0);l++) {
+                    for (int l = 0;l < inputLength;l++) {
                         sum += partialDeviationError.get(l, i, j, k);
                     }
-                    System.out.println(sum);
+                    hiddenLayerDecent.set(sum, i, j, k);
+//                    System.out.println(sum);
                 }
             }
         }
-        System.out.print("\n\n\n\n  Length=" + partialDeviationError.size());
+
+        // ∂CT/∂b
+        MyNumArray hiddenLayerDecent2 = new MyNumArray(hiddenLayers.layerLength(0));
+        for (int i = 0;i < hiddenLayers.layerLength(0);i++) {
+            float sum = 0;
+            for (int j = 0;j < inputLength;j++) {
+                sum += SigmaArray.get(j, i);
+            }
+            hiddenLayerDecent2.set(sum, i);
+
+
+        }
+
+        for (int i = 0;i < inputLength;i++) {
+//            out.println(" -- ");
+            for (int j = 0;j < outputLayers.layerLength(1);j++) {
+                float value = globalA2array.get(i, j);
+                float sum2 = 0;
+                for (int k = 0;k < outputLayers.layerLength(0);k++) {
+                    float a = value * dCda3δ3Array.get(i, k);
+//                    out.print(a);
+//                    out.print(", ");
+                }
+//                out.println("");
+            }
+        }
+        out.println("totalErrorC=" + totalErrorC);
         return 0;
     }
 
