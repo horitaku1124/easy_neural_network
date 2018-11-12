@@ -161,21 +161,21 @@ public class SolverTestB24 {
             }
             // 2乗誤差の偏微分 出力層
 
-            MyNumArray outputBiasError = new MyNumArray(outputBiases.layerLength(0));
-            for (int i = 0;i < outputBiasError.layerLength(0);i++) {
+            MyNumArray outputBiasDiff = new MyNumArray(outputBiases.layerLength(0));
+            for (int i = 0;i < outputBiasDiff.layerLength(0);i++) {
                 float sum = 0;
                 for (int l = 0;l < inputLength;l++) {
                     sum += dCda3δ3Array.get(l, i);
                 }
 //                out.println(sum);
-                outputBiasError.set(sum, i);
+                outputBiasDiff.set(sum, i);
             }
 
 
 
             // 勾配
             // 隠れ層 -  ∂CT/∂w
-            MyNumArray hiddenLayerDecent = new MyNumArray(
+            MyNumArray hiddenWeightsDecent = new MyNumArray(
                     hiddenWeights.layerLength(0),
                     hiddenWeights.layerLength(1),
                     hiddenWeights.layerLength(2)
@@ -187,24 +187,24 @@ public class SolverTestB24 {
                         for (int l = 0;l < inputLength;l++) {
                             sum += partialDeviationError.get(l, i, j, k);
                         }
-                        hiddenLayerDecent.set(sum, i, j, k);
-//                    System.out.println(sum);
+                        hiddenWeightsDecent.set(sum, i, j, k);
+//                        System.out.println(sum);
                     }
                 }
             }
 
             // 隠れ層 - ∂CT/∂b
-            MyNumArray hiddenLayerDecent2 = new MyNumArray(hiddenWeights.layerLength(0));
+            MyNumArray hiddenBiasDiff = new MyNumArray(hiddenWeights.layerLength(0));
             for (int i = 0; i < hiddenWeights.layerLength(0); i++) {
                 float sum = 0;
                 for (int j = 0;j < inputLength;j++) {
                     sum += SigmaArray.get(j, i);
                 }
-                hiddenLayerDecent2.set(sum, i);
+                hiddenBiasDiff.set(sum, i);
 //                out.println(sum);
             }
 
-            MyNumArray outputLayerDecent = new MyNumArray(
+            MyNumArray hiddenWeightsDiff = new MyNumArray(
                     inputLength,
                     outputWeights.layerLength(0),
                     outputWeights.layerLength(1)
@@ -215,7 +215,7 @@ public class SolverTestB24 {
                     float value = globalA2array.get(i, j);
                     for (int k = 0; k < outputWeights.layerLength(0); k++) {
                         float a = value * dCda3δ3Array.get(i, k);
-                        outputLayerDecent.set(a, i, k, j);
+                        hiddenWeightsDiff.set(a, i, k, j);
 //                        out.print(a);
 //                        out.print(", ");
                     }
@@ -224,7 +224,7 @@ public class SolverTestB24 {
             }
 
             // 出力層 - ∂CT/∂w
-            MyNumArray outputLayerDecentParams = new MyNumArray(
+            MyNumArray outputWeightsDiff = new MyNumArray(
                     outputWeights.layerLength(0),
                     outputWeights.layerLength(1)
             );
@@ -232,9 +232,9 @@ public class SolverTestB24 {
                 for (int j = 0; j < outputWeights.layerLength(1); j++) {
                     float sum = 0;
                     for (int l = 0;l < inputLength;l++) {
-                        sum += outputLayerDecent.get(l, i, j);
+                        sum += hiddenWeightsDiff.get(l, i, j);
                     }
-                    outputLayerDecentParams.set(sum, i, j);
+                    outputWeightsDiff.set(sum, i, j);
 //                    out.println(sum);
                 }
             }
@@ -246,25 +246,25 @@ public class SolverTestB24 {
             for (int i = 0; i < hiddenWeights.layerLength(0); i++) {
                 for (int j = 0; j < hiddenWeights.layerLength(1); j++) {
                     for (int k = 0; k < hiddenWeights.layerLength(2); k++) {
-                        float value = hiddenWeights.get(i, j, k) + hiddenLayerDecent.get(i, j, k) * learntRatio;
+                        float value = hiddenWeights.get(i, j, k) - hiddenWeightsDecent.get(i, j, k) * learntRatio;
+//                        out.println(hiddenWeights.get(i, j, k) + ", " + hiddenWeightsDecent.get(i, j, k) + ", " + value);
                         hiddenWeights.set(value, i, j, k);
                     }
                 }
             }
 
             for (int i = 0;i < hiddenBiases.layerLength(0);i++) {
-                float value = hiddenBiases.get(i) + hiddenLayerDecent2.get(i) * learntRatio;
+                float value = hiddenBiases.get(i) - hiddenBiasDiff.get(i) * learntRatio;
                 hiddenBiases.set(value, i);
             }
-            for (int i = 0; i < outputWeights.layerLength(0); i++) {
-                for (int j = 0; j < outputWeights.layerLength(1); j++) {
-                    float value = outputWeights.get(i, j) - outputLayerDecentParams.get(i, j) * learntRatio;
-//                    out.println(outputWeights.get(i, j) + ", " + outputLayerDecentParams.get(i, j));
+            for (int i = 0; i < outputWeightsDiff.layerLength(0); i++) {
+                for (int j = 0; j < outputWeightsDiff.layerLength(1); j++) {
+                    float value = outputWeights.get(i, j) - outputWeightsDiff.get(i, j) * learntRatio;
                     outputWeights.set(value, i, j);
                 }
             }
-            for (int i = 0;i < outputBiasError.layerLength(0);i++) {
-                float value = outputBiases.get(i) + outputBiasError.get(i) * learntRatio;
+            for (int i = 0;i < outputBiasDiff.layerLength(0);i++) {
+                float value = outputBiases.get(i) - outputBiasDiff.get(i) * learntRatio;
                 outputBiases.set(value, i);
             }
         }
