@@ -10,7 +10,7 @@ public class MyNumArray {
     public MyNumArray(float[] data) {
         ndim = 1;
         size = data.length;
-        shape = new int[data.length];
+        shape = new int[]{data.length};
         internalData = new float[(int) size];
         int index = 0;
         for (float aData : data) {
