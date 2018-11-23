@@ -32,21 +32,30 @@
             let code = "";
 
             if (dataParser.hasOwnProperty(valueType)) {
-                code += `new ${valueType}[][][] {\n`;
+                code += width === 1 ? `new ${valueType}[][] {\n` : `new ${valueType}[][][] {\n`;
             }
 
             for (let i = 0;i < widthLength;i++) {
                 let widthIndex = i * (paddingLeft + width + paddingRight);
-                code += " {\n";
-                for (let j = 0;j < height;j++) {
+                if (width === 1) {
                     let ws = [];
-                    for (let k = 0;k < width;k++) {
-                        let val = lines[j][paddingLeft + widthIndex + k];
+                    for (let j = 0;j < height;j++) {
+                        let val = lines[j][paddingLeft + widthIndex];
                         ws.push(dataParser[valueType](val));
                     }
                     code += "  {" + ws.join(",") + "},\n";
+                } else {
+                    code += " {\n";
+                    for (let j = 0;j < height;j++) {
+                        let ws = [];
+                        for (let k = 0;k < width;k++) {
+                            let val = lines[j][paddingLeft + widthIndex + k];
+                            ws.push(dataParser[valueType](val));
+                        }
+                        code += "  {" + ws.join(",") + "},\n";
+                    }
+                    code += " },\n";
                 }
-                code += " },\n";
             }
             code += "};\n";
             document.getElementById('output').value = code;
