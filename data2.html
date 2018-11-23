@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV Converter</title>
+    <style>
+        input[type=number] {
+            text-align: right;
+            width: 30px;
+        }
+        input[name=value_type] {
+            margin-right: 10px;
+            margin-left: 0;
+        }
+    </style>
+    <script>
+        const dataParser = {
+            "int": v => parseInt(v),
+            "float": v => parseFloat(v) + "f",
+            "boolean": v => v === "1" ? "true" : "false",
+        };
+        function convertToJava() {
+            let data = document.getElementById('excel_data').value;
+            let lines = data.split("\n").map(l => l.split("\t"));
+            let width = parseInt(document.getElementById('width').value);
+            let height = parseInt(document.getElementById('height').value);
+            let paddingLeft = parseInt(document.getElementById('padding_left').value);
+            let paddingRight = parseInt(document.getElementById('padding_right').value);
+            let widthLength = lines[0].length / (paddingLeft + width + paddingRight);
+            let valueType = document.querySelector('input[name=value_type]:checked').value;
+
+            let code = "";
+
+            if (dataParser.hasOwnProperty(valueType)) {
+                code += `new ${valueType}[][][] {\n`;
+            }
+
+            for (let i = 0;i < widthLength;i++) {
+                let widthIndex = i * (paddingLeft + width + paddingRight);
+                code += " {\n";
+                for (let j = 0;j < height;j++) {
+                    let ws = [];
+                    for (let k = 0;k < width;k++) {
+                        let val = lines[j][paddingLeft + widthIndex + k];
+                        ws.push(dataParser[valueType](val));
+                    }
+                    code += "  {" + ws.join(",") + "},\n";
+                }
+                code += " },\n";
+            }
+            code += "};\n";
+            document.getElementById('output').value = code;
+        }
+    </script>
+</head>
+<body>
+    <table style="width: 100%;">
+        <tr>
+            <td><textarea style="width: 100%;" id="excel_data" cols="30" rows="10"></textarea></td>
+            <td style="width: 220px;">
+                Int <input type="radio" name="value_type" value="int" checked>
+                Float <input type="radio" name="value_type" value="float">
+                Boolean <input type="radio" name="value_type" value="boolean"><br/>
+                Width:<input type="number" id="width" value="3" /><br/>
+                Height:<input type="number" id="height" value="4" /><br/>
+                PaddingLeft:<input type="number" id="padding_left" value="0" /><br/>
+                PaddingRight:<input type="number" id="padding_right" value="1" /><br/>
+                <input type="button" value="toJava" onclick="convertToJava()" />
+            </td>
+            <td><textarea style="width: 100%;" id="output"  cols="30" rows="10"></textarea></td>
+        </tr>
+    </table>
+</body>
+</html>
