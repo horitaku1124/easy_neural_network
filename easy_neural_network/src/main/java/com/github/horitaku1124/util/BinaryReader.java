@@ -1,14 +1,31 @@
 package com.github.horitaku1124.util;
 
 public class BinaryReader {
+    private static BinaryReader LittleEndianReader;
+    private static BinaryReader BigEndianReader;
+    static {
+        LittleEndianReader = new BinaryReader(Endian.Little);
+        BigEndianReader = new BinaryReader(Endian.Big);
+    }
     public enum Endian {
         Little,
         Big
     }
     private Endian endianness;
-    public BinaryReader(Endian endian) {
+    private BinaryReader() {
+
+    }
+    private BinaryReader(Endian endian) {
         this.endianness = endian;
     }
+
+    public static BinaryReader getLittleEndianReader() {
+        return LittleEndianReader;
+    }
+    public static BinaryReader getBigEndianReader() {
+        return BigEndianReader;
+    }
+
 
     public short bytesToShort(byte[] data, long _offset) {
         int offset = (int) _offset;

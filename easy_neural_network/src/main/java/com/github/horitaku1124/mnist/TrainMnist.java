@@ -76,7 +76,7 @@ public class TrainMnist {
 
     }
     public static void setupInputData(String inputData, String answerData) throws IOException {
-        BinaryReader br = new BinaryReader(BinaryReader.Endian.Big);
+        BinaryReader br = BinaryReader.getBigEndianReader();
         float[][][] allImageData;
         try (FileInputStream fs = new FileInputStream(inputData)) {
             byte[] buf = new byte[16];

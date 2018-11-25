@@ -8,9 +8,9 @@ import java.io.IOException;
 /**
  * http://yann.lecun.com/exdb/mnist/
  */
-public class ImageRead {
+public class ImageReadTest {
     public static void main(String[] args) throws IOException {
-        BinaryReader br = new BinaryReader(BinaryReader.Endian.Big);
+        BinaryReader br = BinaryReader.getBigEndianReader();
         byte[][][] allImageData;
         try (FileInputStream fs = new FileInputStream("./dataset/t10k-images-idx3-ubyte")) {
             byte[] buf = new byte[16];

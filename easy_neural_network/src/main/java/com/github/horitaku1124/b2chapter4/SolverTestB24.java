@@ -1,6 +1,7 @@
 package com.github.horitaku1124.b2chapter4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.horitaku1124.util.Calculation;
 import com.github.horitaku1124.util.MyNumArray;
 
 import java.io.File;
@@ -39,9 +40,6 @@ public class SolverTestB24 {
         dist.outputBiases = new MyNumArray(new float[]{0.936020788f, 0.281364005f});
     }
 
-    private static float calculateOutputA(float z2) {
-        return 1.0f / (1.0f + (float)Math.exp(-z2));
-    }
 
     public static float targetFunction(OutputData dist) {
         final int inputLength = InputData.inputLayers.layerLength(0);
@@ -66,7 +64,7 @@ public class SolverTestB24 {
                 z2 += dist.hiddenBiases.get(i);
 //                out.print(z2);
 //                out.print(",");
-                float a2 = calculateOutputA(z2); // a2i
+                float a2 = Calculation.calculateOutputA(z2); // a2i
                 a2array.set(a2, i);
                 globalA2array.set(a2, l, i);
                 float az2 = a2 * (1 - a2); // a'(z2i)
@@ -83,7 +81,7 @@ public class SolverTestB24 {
             for (int i = 0; i < dist.outputWeights.layerLength(0); i++) {
                 float z3 = a2array.sumProductRank1x2(dist.outputWeights, i) + dist.outputBiases.get(i);
                 z3array.set(z3, i);
-                float a3 = calculateOutputA(z3);
+                float a3 = Calculation.calculateOutputA(z3);
                 float az3 = a3 * (1 - a3);
                 a3array.set(a3, i);
                 az3array.set(az3, i);
