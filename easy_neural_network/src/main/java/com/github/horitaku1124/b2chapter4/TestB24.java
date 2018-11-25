@@ -26,7 +26,6 @@ public class TestB24 {
                 },
         };
         inputLayers = new MyNumArray(_inputLayers);
-
     }
 
     private static float calculateOutputA(float z2) {
@@ -49,8 +48,8 @@ public class TestB24 {
         setupData();
 
         for (int l = 0;l < inputLayers.layerLength(0);l++) {
-            MyNumArray a2array =  new MyNumArray(trained.hiddenWeights.layerLength(0));
-            MyNumArray az2array =  new MyNumArray(trained.hiddenWeights.layerLength(0));
+            MyNumArray a2array = new MyNumArray(trained.hiddenWeights.layerLength(0));
+            MyNumArray az2array = new MyNumArray(trained.hiddenWeights.layerLength(0));
             for (int i = 0; i < trained.hiddenWeights.layerLength(0); i++) {
                 float z2 = trained.hiddenWeights.sumProductRank3x3(i, inputLayers, l);
                 z2 += trained.hiddenBiases.get(i);
