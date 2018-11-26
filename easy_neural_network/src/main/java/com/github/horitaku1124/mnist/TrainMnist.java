@@ -13,7 +13,7 @@ import static com.github.horitaku1124.mnist.InputData.inputLayers;
 import static java.lang.Math.max;
 
 public class TrainMnist {
-    public static OutputData resultData;
+    public static CNNOutputData resultData;
     private static float targetFunction() {
 
         // 6x6の畳み込み層を3層、入力層分用意
@@ -128,7 +128,7 @@ public class TrainMnist {
         final float h = 0.1f;
         setupInputData("./dataset/t10k-images-idx3-ubyte" ,"./dataset/t10k-labels-idx1-ubyte");
 
-        resultData = new OutputData();
+        resultData = new CNNOutputData();
         resultData.initializeData();
         for(int b = 0;b < Loop;b++) {
             for (long i = 0;i < resultData.allLength;i++) {

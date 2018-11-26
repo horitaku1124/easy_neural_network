@@ -153,7 +153,7 @@ public class Train5_2 {
             filewriter.write(json);
         }
 
-//        OutputData hoge = mapper.readValue(json, OutputData.class);
+//        CNNOutputData hoge = mapper.readValue(json, CNNOutputData.class);
 
         System.out.println(json);
 //        System.out.println(hoge);

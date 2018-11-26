@@ -1,6 +1,6 @@
 package com.github.horitaku1124.mnist;
 
-public class OutputData {
+public class CNNOutputData {
 
     /** 畳み込み層 - フィルター */
     public float[][][] convolutionFilters;
