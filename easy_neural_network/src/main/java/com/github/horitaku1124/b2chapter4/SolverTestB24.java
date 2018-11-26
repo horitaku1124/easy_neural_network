@@ -9,9 +9,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class SolverTestB24 {
-    final static float learntRatio = 0.2f;
+    private final static float learntRatio = 0.2f;
 
-    public static void setupData(OutputData dist) {
+    private static void setupData(OutputData dist) {
         dist.hiddenWeights = new MyNumArray(new float[][][]{
                 {
                         {0.433838676f, 0.595730963f, 0.149209681f},
@@ -41,7 +41,7 @@ public class SolverTestB24 {
     }
 
 
-    public static float targetFunction(OutputData dist) {
+    private static float targetFunction(OutputData dist) {
         final int inputLength = InputData.inputLayers.layerLength(0);
 
         MyNumArray SigmaArray = new MyNumArray(inputLength, dist.hiddenWeights.layerLength(0));
@@ -105,7 +105,7 @@ public class SolverTestB24 {
             totalErrorC += C;
 //            out.println("");
 
-//            System.out.println(" C=" + C);
+            System.out.println(" C=" + C);
 
             // δ算出
             // 出力層

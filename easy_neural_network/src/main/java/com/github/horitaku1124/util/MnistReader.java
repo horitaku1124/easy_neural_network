@@ -11,6 +11,9 @@ public class MnistReader {
             byte[] buf = new byte[16];
             fs.read(buf);
             long magicNumber = br.bytesToLong(buf, 0);
+            if (magicNumber != 2051L) {
+                throw new RuntimeException("magicNumber is invalid " +magicNumber);
+            }
             int imageNumber = (int) br.bytesToLong(buf, 4);
             int rowsNumber = (int) br.bytesToLong(buf, 8);
             int columnsNumber = (int) br.bytesToLong(buf, 12);
@@ -41,16 +44,17 @@ public class MnistReader {
             byte[] buf = new byte[8];
             fs.read(buf);
             long magicNumber = br.bytesToLong(buf, 0);
+            if (magicNumber != 2049L) {
+                throw new RuntimeException("magicNumber is invalid " +magicNumber);
+            }
             int labelNumber = (int) br.bytesToLong(buf, 4);
-            answerLayer = new float[labelNumber][2];
-//            System.out.println(magicNumber);
-//            System.out.println(labelNumber);
+            answerLayer = new float[labelNumber][10];
+
             byte[] labels = new byte[labelNumber];
             fs.read(labels);
-            for (int i = 0;i < labels.length / 10;i++) {
-                if (labels[i] < 2) {
-                    answerLayer[i][labels[i]] = 1f;
-                }
+            for (int i = 0;i < labels.length;i++) {
+                int labelValue = labels[i];
+                answerLayer[i][labelValue] = 1f;
             }
         }
         return new MyNumArray(answerLayer);

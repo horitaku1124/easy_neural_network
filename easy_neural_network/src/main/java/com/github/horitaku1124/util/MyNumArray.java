@@ -150,4 +150,12 @@ public class MyNumArray {
         }
         return ret;
     }
+
+    public static MyNumArray rand(int... shapes) {
+        MyNumArray mna = new MyNumArray(shapes);
+        for (int i = 0;i < mna.size();i++) {
+            mna.internalData[i] = (float) Math.random();
+        }
+        return mna;
+    }
 }
