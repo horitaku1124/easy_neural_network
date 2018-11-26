@@ -120,6 +120,7 @@ public class Train5 {
         resultData.initializeData();
 
         for(int b = 0;b < Loop;b++) {
+            long start = System.currentTimeMillis();
             for (long i = 0;i < resultData.allLength;i++) {
                 float data = resultData.get(i);
                 float baseError = targetFunction();
@@ -130,6 +131,8 @@ public class Train5 {
                 resultData.set(i, data);
 //                System.out.println("baseError=" + baseError + " nextError=" + nextError + " data=" + data);
             }
+            long end = System.currentTimeMillis();
+            System.out.println((end - start) + "ms");
             System.out.println("b=" + b + " error=" + targetFunction());
             if (targetFunction() < 0.01) {
                 break;
@@ -144,7 +147,7 @@ public class Train5 {
             filewriter.write(json);
         }
 
-//        OutputData hoge = mapper.readValue(json, OutputData.class);
+//        CNNOutputData hoge = mapper.readValue(json, CNNOutputData.class);
 
         System.out.println(json);
 //        System.out.println(hoge);
