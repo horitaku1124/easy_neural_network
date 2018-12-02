@@ -158,4 +158,53 @@ public class MyNumArray {
         }
         return mna;
     }
+
+    public void printLayer(int... layer) {
+        int printLength = ndim - layer.length;
+        if (printLength == 0) {
+            throw new RuntimeException("ndim = " + ndim + " layer.length = " + layer.length);
+        }
+        int[] getLayer = new int[ndim];
+        for (int l = 0;l < layer.length;l++) {
+            getLayer[l] = layer[l];
+        }
+        if (printLength == 1) {
+            int len = layerLength(layer.length);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0;i < len;i++) {
+                getLayer[getLayer.length - 1] = i;
+                if (i != 0) {
+                    sb.append(" ");
+                }
+                sb.append(get(getLayer));
+            }
+            System.out.println(sb.toString());
+        }
+        if (printLength == 2) {
+            int len1 = layerLength(layer.length);
+            int len2 = layerLength(layer.length + 1);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0;i < len1;i++) {
+                getLayer[getLayer.length - 2] = i;
+                for (int j = 0;j < len2;j++) {
+                    getLayer[getLayer.length - 1] = j;
+                    if (j != 0) {
+                        sb.append(" ");
+                    }
+                    String str = String.format("%1.2f", get(getLayer));
+                    if ("0.00".equals(str)) {
+                        str = "0  ";
+                    } else if (str.startsWith("0.")) {
+                        str = str.replace("0.", ".");
+                    } else if ("1.00".equals(str)) {
+                        str = "1.0";
+                    }
+                    sb.append(str);
+                }
+                sb.append("\n");
+            }
+            System.out.println(sb.toString());
+        }
+
+    }
 }

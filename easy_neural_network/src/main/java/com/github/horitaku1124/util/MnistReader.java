@@ -24,7 +24,7 @@ public class MnistReader {
             int imageSize = rowsNumber * columnsNumber;
             allImageData = new float[imageNumber][rowsNumber][columnsNumber];
             byte[] img = new byte[imageSize];
-            for (int i = 0;i < imageNumber / 10;i++) {
+            for (int i = 0;i < imageNumber;i++) {
                 fs.read(img);
                 for (int x = 0;x < rowsNumber;x++) {
                     for (int y = 0;y < columnsNumber;y++) {
