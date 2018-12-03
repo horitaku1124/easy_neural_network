@@ -2,6 +2,8 @@ package com.github.horitaku1124.chapter4;
 
 import com.github.horitaku1124.util.MyNumArray;
 
+import static com.github.horitaku1124.util.ActivationFunction.sigmoid;
+
 public class SolverTest4v2 {
     /** 隠れ層 */
     private static MyNumArray hiddenLayerWeights;
@@ -52,27 +54,19 @@ public class SolverTest4v2 {
         final int hiddenLayer = 3;
         int imagesLength = inputImages.layerLength(0);
         MyNumArray resultArray = new MyNumArray(imagesLength, hiddenLayer);
-        MyNumArray output11 = new MyNumArray(64, 3);
+        MyNumArray output11 = new MyNumArray(64, 2);
         float error = 0;
         for (int l = 0; l < imagesLength; l++) {
             for (int i = 0;i < hiddenLayer;i++) {
-                float output = - inputImages.sumProductRank3x3(l, hiddenLayerWeights, i);
-                output += hiddenLayerBias.get(i);
-                output = 1.0f / (1.0f + (float)Math.exp(output));
-                resultArray.set(output, l, i);
+                float x = inputImages.sumProductRank3x3(l, hiddenLayerWeights, i)
+                        - hiddenLayerBias.get(i);
+                resultArray.set(sigmoid(x), l, i);
             }
-            float A = resultArray.sumProductRank2x2(l, outputLayerWeights, 0);
-
-            output11.set(
-                    1.0f / (1.0f + (float)Math.exp(
-                    (-A) + outputLayerBias.get(0))),
-                    l, 0
-            );
-            output11.set(
-                    1.0f / (1.0f + (float)Math.exp(
-                            (-resultArray.sumProductRank2x2(l, outputLayerWeights, 1)+ outputLayerBias.get(1)))),
-                    l, 1
-            );
+            for (int i = 0;i < output11.layerLength(1);i++) {
+                float x = resultArray.sumProductRank2x2(l, outputLayerWeights, i)
+                        - outputLayerBias.get(i);
+                output11.set(sigmoid(x), l, i);
+            }
 
             error += inputLabels.SUMXMY2(output11, l);
         }
@@ -84,7 +78,7 @@ public class SolverTest4v2 {
         final int Loop = 5000;
         final float Step = 0.1f;
         final float h = 0.0001f;
-        SolverTest4v2.setupData();
+        setupData();
 
         MyNumArray inputImages = new MyNumArray(
                 InputData.inputLayers.length,
