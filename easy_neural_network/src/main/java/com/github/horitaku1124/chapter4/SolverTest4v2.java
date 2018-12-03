@@ -14,40 +14,10 @@ public class SolverTest4v2 {
     /** 出力層-閾値 */
     private static MyNumArray outputLayerBias;
     public static void setupData() {
-        float[][][] hiddenLayers = new float[][][]{
-                {
-                        {0.0550f, 0.1660f, 0.1170f},
-                        {0.0790f, 0.3330f, 0.1790f},
-                        {0.1500f, 0.9230f, 0.1190f},
-                        {0.9800f, 0.1110f, 0.1980f},
-                },
-                {
-                        {0.0800f, 0.9120f, 0.1210f},
-                        {0.2940f, 0.1760f, 0.2070f},
-                        {0.3460f, 0.1200f, 0.2180f},
-                        {0.1910f, 0.9720f, 0.0320f},
-                },
-                {
-                        {0.0800f, 0.9120f, 0.1210f},
-                        {0.2940f, 0.1760f, 0.2070f},
-                        {0.3460f, 0.1200f, 0.2180f},
-                        {0.1910f, 0.9720f, 0.0320f},
-                }
-        };
-        hiddenLayerWeights = new MyNumArray(hiddenLayers);
-
-        float[] hiddenThresholds = new float[]{0.9690f, 0.9170f, 0.9410f};
-        hiddenLayerBias = new MyNumArray(hiddenThresholds);
-
-        float[][] outputLayers = new float[][]{
-                {0.1810f, 0.9230f, 0.0610f},
-                {0.9870f, 0.1010f, 0.8420f}
-        };
-        outputLayerWeights = new MyNumArray(outputLayers);
-
-        float[] outputThresholds = new float[] {1.00f, 0.94f};
-        outputLayerBias = new MyNumArray(outputThresholds);
-
+        hiddenLayerWeights = MyNumArray.rand(3, 4, 3);
+        hiddenLayerBias = MyNumArray.rand(3);
+        outputLayerWeights = MyNumArray.rand(2, 3);
+        outputLayerBias = MyNumArray.rand(2);
     }
 
     private static float targetFunction(MyNumArray inputImages, MyNumArray inputLabels) {
