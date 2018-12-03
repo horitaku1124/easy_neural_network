@@ -117,6 +117,16 @@ public class MyNumArray {
         return sum;
     }
 
+    public float sumProductRank2x2(int offset, MyNumArray target, int targetLayer0index) {
+        int num = layerLength(1);
+        int thisOffset = offset * num;
+        int targetLayerOffset = targetLayer0index * target.layerLength(1);
+        float sum = 0;
+        for (int i = 0;i < num;i++) {
+            sum += internalData[i + thisOffset] * target.internalData[i + targetLayerOffset];
+        }
+        return sum;
+    }
     public float sumProductRank1x2(MyNumArray target, int targetLayer0index) {
         int num = (int) size;
         int targetLayerOffset = targetLayer0index * target.layerLength(1);

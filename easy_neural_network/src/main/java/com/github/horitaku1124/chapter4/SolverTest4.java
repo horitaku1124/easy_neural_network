@@ -178,7 +178,7 @@ public class SolverTest4 {
                 set(i, data);
 //                System.out.println(dxdy);
             }
-            System.out.println("b=" + b + " error=" + targetFunction());
+//            System.out.println("b=" + b + " error=" + targetFunction());
             if (targetFunction() < 0.01) {
                 break;
             }

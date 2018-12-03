@@ -17,6 +17,7 @@ public class MnistReader {
             int imageNumber = (int) br.bytesToLong(buf, 4);
             int rowsNumber = (int) br.bytesToLong(buf, 8);
             int columnsNumber = (int) br.bytesToLong(buf, 12);
+
 //            System.out.println(magicNumber);
 //            System.out.println(imageNumber);
 //            System.out.println(rowsNumber);
