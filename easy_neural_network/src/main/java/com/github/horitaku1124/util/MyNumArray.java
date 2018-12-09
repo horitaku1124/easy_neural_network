@@ -182,6 +182,46 @@ public class MyNumArray {
         return mna;
     }
 
+    public static MyNumArray average(MyNumArray input, int axis) {
+        int wide = input.layerLength(1);
+        MyNumArray average = new MyNumArray(wide);
+        double[] sum = new double[wide];
+        for (int i = 0;i < wide;i++) {
+            sum[i] = 0;
+        }
+        int len = input.layerLength(0);
+        for (int i = 0;i < len;i++) {
+            for (int j = 0;j < wide;j++) {
+                sum[j] += input.get(i, j);
+            }
+        }
+
+        for (int i = 0;i < wide;i++) {
+            average.set((float) (sum[i] / len), i);
+        }
+
+        return average;
+    }
+
+    public static MyNumArray std(MyNumArray input, int axis) {
+        int len = input.layerLength(0);
+        int wide = input.layerLength(1);
+        double[] division = new double[wide];
+        MyNumArray average = average(input, axis);
+        for (int i = 0;i < len;i++) {
+            for (int j = 0;j < wide;j++) {
+                float diff = input.get(i, j) - Math.abs(average.get(j));
+                division[j] += diff * diff;
+            }
+        }
+        MyNumArray std = new MyNumArray(wide);
+
+        for (int i = 0;i < wide;i++) {
+            std.set((float) Math.sqrt(division[i] / len), i);
+        }
+        return std;
+    }
+
     public void printLayer(int... layer) {
         int printLength = ndim - layer.length;
         if (printLength == 0) {
