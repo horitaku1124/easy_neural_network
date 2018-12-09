@@ -1,5 +1,9 @@
 package com.github.horitaku1124.util;
 
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
+
 public class MyNumArray {
     public int ndim;
     public long size;
@@ -167,6 +171,36 @@ public class MyNumArray {
         }
     }
 
+    public MyNumArray broadcastSub(MyNumArray num) {
+        MyNumArray result = new MyNumArray(shape);
+        if (ndim == 2 && num.ndim == 1) {
+            int d0 = layerLength(0);
+            int d1 = layerLength(1);
+            for (int i = 0;i < d0;i++) {
+                for (int j = 0;j < d1;j++) {
+                    float sub = this.get(i, j) - num.get(j);
+                    result.set(sub, i, j);
+                }
+            }
+        }
+        return result;
+    }
+
+    public MyNumArray broadcastDivide(MyNumArray num) {
+        MyNumArray result = new MyNumArray(shape);
+        if (ndim == 2 && num.ndim == 1) {
+            int d0 = layerLength(0);
+            int d1 = layerLength(1);
+            for (int i = 0;i < d0;i++) {
+                for (int j = 0;j < d1;j++) {
+                    float divide = this.get(i, j) / num.get(j);
+                    result.set(divide, i, j);
+                }
+            }
+        }
+        return result;
+    }
+
     public static MyNumArray rand(int... shapes) {
         MyNumArray mna = new MyNumArray(shapes);
         for (int i = 0;i < mna.size();i++) {
@@ -180,6 +214,10 @@ public class MyNumArray {
             mna.internalData[i] = 0;
         }
         return mna;
+    }
+
+    public static int[] arange(int num, IntPredicate filter) {
+        return IntStream.range(0, num).filter(filter).toArray();
     }
 
     public static MyNumArray average(MyNumArray input, int axis) {
@@ -202,6 +240,30 @@ public class MyNumArray {
 
         return average;
     }
+
+    public MyNumArray getIn(int[] index) {
+        MyNumArray result;
+        if (ndim == 1) {
+             result = new MyNumArray(index.length);
+             for (int i = 0;i < index.length;i++) {
+                 float value = get(index[i]);
+                 result.set(value, i);
+             }
+            return result;
+        }
+        if (ndim == 2) {
+             result = new MyNumArray(index.length, layerLength(1));
+             for (int i = 0;i < index.length;i++) {
+                 for (int j = 0;j < layerLength(1);j++) {
+                     float value = get(index[i], j);
+                     result.set(value, i, j);
+                 }
+             }
+             return result;
+        }
+        return null;
+    }
+
 
     public static MyNumArray std(MyNumArray input, int axis) {
         int len = input.layerLength(0);
@@ -268,6 +330,5 @@ public class MyNumArray {
             }
             System.out.println(sb.toString());
         }
-
     }
 }
