@@ -201,6 +201,15 @@ public class MyNumArray {
         return result;
     }
 
+    public static MyNumArray broadcastDivide(float num, MyNumArray div) {
+        MyNumArray result = new MyNumArray(div.shape);
+
+        for (int i = 0;i < result.size();i++) {
+            result.internalData[i] = num / div.internalData[i];
+        }
+        return result;
+    }
+
     public static MyNumArray rand(int... shapes) {
         MyNumArray mna = new MyNumArray(shapes);
         for (int i = 0;i < mna.size();i++) {
@@ -264,6 +273,30 @@ public class MyNumArray {
         return null;
     }
 
+    public MyNumArray multiply(MyNumArray multi) {
+        MyNumArray result = new MyNumArray(shape);
+        for (int i = 0;i < size;i++) {
+            result.internalData[i] = this.internalData[i] * multi.internalData[i];
+        }
+        return result;
+    }
+
+    public MyNumArray add(MyNumArray multi) {
+        MyNumArray result = new MyNumArray(shape);
+        for (int i = 0;i < size;i++) {
+            result.internalData[i] = this.internalData[i] + multi.internalData[i];
+        }
+        return result;
+    }
+
+    public MyNumArray minus(MyNumArray multi) {
+        MyNumArray result = new MyNumArray(shape);
+        for (int i = 0;i < size;i++) {
+            result.internalData[i] = this.internalData[i] - multi.internalData[i];
+        }
+        return result;
+    }
+
 
     public static MyNumArray std(MyNumArray input, int axis) {
         int len = input.layerLength(0);
@@ -282,6 +315,15 @@ public class MyNumArray {
             std.set((float) Math.sqrt(division[i] / len), i);
         }
         return std;
+    }
+
+    public static MyNumArray sqrt(MyNumArray input) {
+        MyNumArray sqrt = new MyNumArray(input.shape);
+
+        for (int i = 0;i < input.size;i++) {
+            sqrt.internalData[i] = (float) Math.sqrt(input.internalData[i]);
+        }
+        return sqrt;
     }
 
     public void printLayer(int... layer) {

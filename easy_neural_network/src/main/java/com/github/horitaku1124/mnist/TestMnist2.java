@@ -28,7 +28,7 @@ public class TestMnist2 {
         ObjectMapper mapper = new ObjectMapper();
         OutputData trained = mapper.readValue(sb.toString(), OutputData.class);
 
-        for (int l = 0;l < 1;l++) {
+        for (int l = 0;l < 100;l++) {
             MyNumArray a2array = new MyNumArray(trained.hiddenWeights.layerLength(0));
             MyNumArray az2array = new MyNumArray(trained.hiddenWeights.layerLength(0));
             for (int i = 0; i < trained.hiddenWeights.layerLength(0); i++) {
@@ -41,13 +41,30 @@ public class TestMnist2 {
             }
 
             MyNumArray z3array = new MyNumArray(trained.outputWeights.layerLength(0));
+            int maxIndex = -1;
+            float maxValue = 0;
             for (int i = 0; i < trained.outputWeights.layerLength(0); i++) {
                 float z3 = a2array.sumProductRank1x2(trained.outputWeights, i) + trained.outputBiases.get(i);
                 z3array.set(z3, i);
                 float a3 = Calculation.calculateOutputA(z3);
-                System.out.print(a3 + " ");
+                if (maxValue < a3) {
+                    maxIndex = i;
+                    maxValue = a3;
+                }
+//                System.out.print(a3 + " ");
             }
-            System.out.println("");
+            System.out.println("I " + maxIndex + " by " + maxValue);
+            maxIndex = -1;
+            maxValue = 0;
+            for (int i = 0; i < labels.layerLength(1); i++) {
+                float value = labels.get(l, i);
+                if (maxValue < value) {
+                    maxIndex = i;
+                    maxValue = value;
+                }
+//                System.out.print(a3 + " ");
+            }
+            System.out.println("A " + maxIndex);
         }
     }
 }
