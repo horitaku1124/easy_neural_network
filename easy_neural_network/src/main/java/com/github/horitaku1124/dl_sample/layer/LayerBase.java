@@ -35,4 +35,7 @@ public abstract class LayerBase {
                 broadcastDivide(eta, MyNumArray.sqrt(hBiases)).multiply(biasGradient)
         );
     }
+
+    abstract public void forward(MyNumArray x);
+    abstract public void backward(MyNumArray t);
 }
