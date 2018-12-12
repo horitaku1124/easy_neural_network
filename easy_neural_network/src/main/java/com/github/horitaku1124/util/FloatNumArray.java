@@ -7,6 +7,27 @@ public class FloatNumArray extends MyNumBase<Float> {
 
     @Override
     Float[] initializeData(Float[] data) {
-        return new Float[0];
+        Float[] data2 = new Float[data.length];
+        int index = 0;
+        for (Float aData : data) {
+            data2[index] = aData;
+            index++;
+        }
+        return data2;
+    }
+
+    @Override
+    Float[] initializeData(Float[][] data) {
+        int size = data.length * data[0].length;
+        Float[] data2  = new Float[size];
+        int index = 0;
+        for (Float[] aData : data) {
+            for (Float anAData : aData) {
+                data2[index] = anAData;
+                index++;
+            }
+        }
+
+        return data2;
     }
 }
