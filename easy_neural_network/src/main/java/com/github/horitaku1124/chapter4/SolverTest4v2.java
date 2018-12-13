@@ -13,26 +13,31 @@ public class SolverTest4v2 {
     private static MyNumArray outputLayerWeights;
     /** 出力層-閾値 */
     private static MyNumArray outputLayerBias;
-    public static void setupData() {
-        hiddenLayerWeights = MyNumArray.rand(3, 4, 3);
-        hiddenLayerBias = MyNumArray.rand(3);
-        outputLayerWeights = MyNumArray.rand(2, 3);
-        outputLayerBias = MyNumArray.rand(2);
+
+    private final static int DATA_WIDTH = 3;
+    private final static int DATA_HEIGHT = 4;
+    private final static int HIDDEN_LAYER_NUM = 3;
+    private final static int OUTPUT_LAYER_NUM = 2;
+
+    private static void setupData() {
+        hiddenLayerWeights = MyNumArray.rand(HIDDEN_LAYER_NUM, DATA_WIDTH, DATA_HEIGHT);
+        hiddenLayerBias = MyNumArray.rand(HIDDEN_LAYER_NUM);
+        outputLayerWeights = MyNumArray.rand(OUTPUT_LAYER_NUM, HIDDEN_LAYER_NUM);
+        outputLayerBias = MyNumArray.rand(OUTPUT_LAYER_NUM);
     }
 
     private static float targetFunction(MyNumArray inputImages, MyNumArray inputLabels) {
-        final int hiddenLayer = 3;
         int imagesLength = inputImages.layerLength(0);
-        MyNumArray resultArray = new MyNumArray(imagesLength, hiddenLayer);
-        MyNumArray output11 = new MyNumArray(64, 2);
+        MyNumArray resultArray = new MyNumArray(imagesLength, HIDDEN_LAYER_NUM);
+        MyNumArray output11 = new MyNumArray(imagesLength, OUTPUT_LAYER_NUM);
         float error = 0;
         for (int l = 0; l < imagesLength; l++) {
-            for (int i = 0;i < hiddenLayer;i++) {
+            for (int i = 0;i < HIDDEN_LAYER_NUM;i++) {
                 float x = inputImages.sumProductRank3x3(l, hiddenLayerWeights, i)
                         - hiddenLayerBias.get(i);
                 resultArray.set(sigmoid(x), l, i);
             }
-            for (int i = 0;i < output11.layerLength(1);i++) {
+            for (int i = 0;i < OUTPUT_LAYER_NUM;i++) {
                 float x = resultArray.sumProductRank2x2(l, outputLayerWeights, i)
                         - outputLayerBias.get(i);
                 output11.set(sigmoid(x), l, i);
