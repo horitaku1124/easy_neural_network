@@ -6,6 +6,17 @@ public abstract class MyNumBase<R> {
     public int[] shape;
     public R[] internalData;
 
+
+    public MyNumBase(int... shapeDefinition) {
+        ndim = shapeDefinition.length;
+        size = 1;
+        for (int num: shapeDefinition) {
+            size *= num;
+        }
+        shape = shapeDefinition;
+        internalData = initializeData((int) size);
+    }
+
     public MyNumBase(R[] data) {
         ndim = 1;
         size = data.length;
@@ -18,8 +29,10 @@ public abstract class MyNumBase<R> {
         size = internalData.length;
         shape = new int[]{data.length, data[0].length};
     }
+    abstract R[] initializeData(int size);
     abstract R[] initializeData(R[] data);
     abstract R[] initializeData(R[][] data);
+    abstract MyNumBase newInstance(int... shapeDefinition);
 
 
     public int layerLength(int dimension) {
@@ -47,5 +60,27 @@ public abstract class MyNumBase<R> {
             throw new ArrayIndexOutOfBoundsException(index);
         }
         return index;
+    }
+
+    public void set(R value, int... offset) {
+        internalData[offsetToIndex(offset)] = value;
+    }
+
+    public R get(int... offset) {
+        return internalData[offsetToIndex(offset)];
+    }
+
+    public MyNumBase<R> reshape(int... shape) {
+        int length = 1;
+        for (int i: shape) {
+            length *= i;
+        }
+        if (length != size) {
+            throw new RuntimeException("shape size mismatch");
+        }
+        MyNumBase<R> newArray = newInstance(shape);
+        if (size >= 0) System.arraycopy(this.internalData,
+                0, newArray.internalData, 0, Math.toIntExact(size));
+        return newArray;
     }
 }

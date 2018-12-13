@@ -6,6 +6,11 @@ public class FloatNumArray extends MyNumBase<Float> {
     }
 
     @Override
+    Float[] initializeData(int size) {
+        return new Float[size];
+    }
+
+    @Override
     Float[] initializeData(Float[] data) {
         Float[] data2 = new Float[data.length];
         int index = 0;
@@ -29,5 +34,10 @@ public class FloatNumArray extends MyNumBase<Float> {
         }
 
         return data2;
+    }
+
+    @Override
+    MyNumBase<Float> newInstance(int... shapeDefinition) {
+        return null;
     }
 }
