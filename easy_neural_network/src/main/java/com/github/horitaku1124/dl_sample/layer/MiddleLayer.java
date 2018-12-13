@@ -13,11 +13,13 @@ public class MiddleLayer extends LayerBase {
     @Override
     public void forward(MyNumArray x) {
         this.x = x;
-//        this.u = MyNumArray.dot
+        this.u = x.dot(this.weights);
+        this.y = this.u.where(n -> n <= 0f ? 0f : n);
     }
 
     @Override
-    public void backward(MyNumArray t) {
-
+    public void backward(MyNumArray grad_y) {
+        MyNumArray u = this.u.where(n -> n <= 0.f ? 0 : 1f);
+        MyNumArray delta = grad_y.multiply(u);
     }
 }

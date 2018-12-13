@@ -1,5 +1,6 @@
 package com.github.horitaku1124.util;
 
+import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 
@@ -323,6 +324,63 @@ public class MyNumArray {
             sqrt.internalData[i] = (float) Math.sqrt(input.internalData[i]);
         }
         return sqrt;
+    }
+
+    public MyNumArray reshape(int... shape) {
+        int length = 1;
+        for (int i: shape) {
+            length *= i;
+        }
+        if (length != size) {
+            throw new RuntimeException("shape size mismatch");
+        }
+        MyNumArray newArray = new MyNumArray(shape);
+        if (size >= 0) System.arraycopy(this.internalData,
+                0, newArray.internalData, 0, Math.toIntExact(size));
+        return newArray;
+    }
+
+    public MyNumArray dot(MyNumArray target) {
+        int num1 = layerLength(0);
+        int num2 = layerLength(1);
+        int targetNum1 = target.layerLength(0);
+        boolean isVertical = false;
+        if (target.ndim == 2) {
+            int targetNum2 = target.layerLength(1);
+            if (targetNum2 == 1) {
+                target = target.reshape(targetNum1);
+                isVertical = true;
+            }
+        }
+        if (isVertical) {
+            MyNumArray ret = new MyNumArray(num1);
+            for (int i = 0;i < num1;i++) {
+                int sum = 0;
+                for (int j = 0;j < num2;j++) {
+                    sum += get(i, j) * target.get(j);
+                }
+                ret.set(sum, i);
+            }
+            return ret;
+        } else {
+            MyNumArray ret = new MyNumArray(num2);
+            for (int i = 0;i < num2;i++) {
+                int sum = 0;
+                for (int j = 0;j < num1;j++) {
+                    sum += get(j, i) * target.get(j);
+                }
+                ret.set(sum, i);
+            }
+            return ret;
+        }
+    }
+
+    public MyNumArray where(Function<Float, Float> filter) {
+        MyNumArray result = new MyNumArray(this.shape);
+        for (int i = 0;i < size;i++) {
+            result.internalData[i] = filter.apply(this.internalData[i]);
+        }
+        return result;
     }
 
     public void printLayer(int... layer) {

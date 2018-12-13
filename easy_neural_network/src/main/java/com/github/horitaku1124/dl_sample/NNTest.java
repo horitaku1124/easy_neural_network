@@ -1,18 +1,20 @@
 package com.github.horitaku1124.dl_sample;
 
 import com.github.horitaku1124.dl_sample.layer.LayerBase;
+import com.github.horitaku1124.dl_sample.layer.MiddleLayer;
+import com.github.horitaku1124.dl_sample.layer.OutputLayer;
 import com.github.horitaku1124.util.CSVReader;
 import com.github.horitaku1124.util.MyNumArray;
 
 import java.io.IOException;
 
 public class NNTest {
-    LayerBase middleLayer1;
-    LayerBase middleLayer2;
-    LayerBase outputLayer;
+    MiddleLayer middleLayer1;
+    MiddleLayer middleLayer2;
+    OutputLayer outputLayer;
 
-    private void forwardPropagation(MyNumArray irisData) {
-
+    private void forwardPropagation(MyNumArray x) {
+        middleLayer1.forward(x);
     }
 
     public static void main(String[] args) throws IOException {

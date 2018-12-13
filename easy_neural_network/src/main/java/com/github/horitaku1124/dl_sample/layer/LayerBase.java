@@ -4,14 +4,14 @@ import com.github.horitaku1124.util.MyNumArray;
 import static com.github.horitaku1124.util.MyNumArray.broadcastDivide;
 
 public abstract class LayerBase {
-    private MyNumArray weights;
-    private MyNumArray biases;
-    private MyNumArray hWeights;
-    private MyNumArray hBiases;
+    protected MyNumArray weights;
+    protected MyNumArray biases;
+    protected MyNumArray hWeights;
+    protected MyNumArray hBiases;
 
 
-    private MyNumArray weightGradient;
-    private MyNumArray biasGradient;
+    protected MyNumArray weightGradient;
+    protected MyNumArray biasGradient;
 
     public LayerBase(int upper, int n) {
         weights = MyNumArray.rand(upper, n);
