@@ -201,6 +201,15 @@ public class MyNumArray {
         return result;
     }
 
+    public MyNumArray broadcastDivide(float num) {
+        MyNumArray result = new MyNumArray(shape);
+
+        for (int i = 0;i < size;i++) {
+            result.internalData[i] = internalData[i] / num;
+        }
+        return result;
+    }
+
     public static MyNumArray broadcastDivide(float num, MyNumArray div) {
         MyNumArray result = new MyNumArray(div.shape);
 

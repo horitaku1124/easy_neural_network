@@ -40,7 +40,8 @@ public class CSVReader implements Closeable {
         }
         return data;
     }
-    public MyNumArray readToMuyNum(Function<String, Float[]> function) throws IOException {
+
+    public MyNumArray readToMuyNum(Function<String, Float[]> function, boolean flip) throws IOException {
         List<Float[]> data = readAll(function);
         Float[] r = data.get(0);
         MyNumArray data2;
@@ -48,6 +49,13 @@ public class CSVReader implements Closeable {
             data2 = new MyNumArray(data.size());
         } else {
             data2 = new MyNumArray(data.size(), r.length);
+        }
+        if (flip) {
+            List<Float[]> newData = new ArrayList<>();
+            for (int i = data.size() - 1;i >= 0;i--) {
+                newData.add(data.get(i));
+            }
+            data = newData;
         }
 
         int index = 0;
@@ -58,6 +66,10 @@ public class CSVReader implements Closeable {
             }
         }
         return data2;
+    }
+    public MyNumArray readToMuyNum(Function<String, Float[]> function) throws IOException {
+        return readToMuyNum(function, false);
+
     }
 
     @Override
