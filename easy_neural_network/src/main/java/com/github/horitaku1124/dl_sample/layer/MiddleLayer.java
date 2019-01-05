@@ -21,5 +21,6 @@ public class MiddleLayer extends LayerBase {
     public void backward(MyNumArray grad_y) {
         MyNumArray u = this.u.where(n -> n <= 0.f ? 0 : 1f);
         MyNumArray delta = grad_y.multiply(u);
+        x.transpose()
     }
 }

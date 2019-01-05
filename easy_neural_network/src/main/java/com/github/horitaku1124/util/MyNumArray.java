@@ -372,13 +372,15 @@ public class MyNumArray {
             }
             return ret;
         } else {
-            MyNumArray ret = new MyNumArray(num2);
-            for (int i = 0;i < num2;i++) {
-                int sum = 0;
-                for (int j = 0;j < num1;j++) {
-                    sum += get(j, i) * target.get(j);
+            MyNumArray ret = new MyNumArray(num1, target.layerLength(1));
+            for (int i = 0;i < num1;i++) {
+                for (int j = 0;j < target.layerLength(1);j++) {
+                    float value = 0;
+                    for (int k = 0;k < num2;k++) {
+                        value += get(i, k) * target.get(k, j);
+                    }
+                    ret.set(value, i, j);
                 }
-                ret.set(sum, i);
             }
             return ret;
         }
@@ -438,5 +440,8 @@ public class MyNumArray {
             }
             System.out.println(sb.toString());
         }
+    }
+
+    public void transpose() {
     }
 }

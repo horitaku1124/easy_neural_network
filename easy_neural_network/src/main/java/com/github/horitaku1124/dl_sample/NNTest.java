@@ -9,12 +9,15 @@ import com.github.horitaku1124.util.MyNumArray;
 import java.io.IOException;
 
 public class NNTest {
-    MiddleLayer middleLayer1;
-    MiddleLayer middleLayer2;
-    OutputLayer outputLayer;
+    static MiddleLayer middleLayer1;
+    static MiddleLayer middleLayer2;
+    static OutputLayer outputLayer;
 
-    private void forwardPropagation(MyNumArray x) {
+
+    private static void forwardPropagation(MyNumArray x) {
         middleLayer1.forward(x);
+        middleLayer2.forward(x);
+        outputLayer.forward(x);
     }
 
     public static void main(String[] args) throws IOException {
@@ -70,8 +73,13 @@ public class NNTest {
         int batch_size = 8;
         int interval = 100;
 
-        for (int i = 0;i < epoch;i++) {
+        middleLayer1 = new MiddleLayer(n_in, n_mid);
+        middleLayer2 = new MiddleLayer(n_mid, n_mid);
+        outputLayer = new OutputLayer(n_mid, n_out);
 
+
+        for (int i = 0;i < epoch;i++) {
+            forwardPropagation(inputTrain);
         }
     }
 }

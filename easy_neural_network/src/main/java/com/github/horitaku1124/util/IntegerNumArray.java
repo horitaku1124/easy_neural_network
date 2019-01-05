@@ -50,6 +50,17 @@ public class IntegerNumArray extends MyNumBase<Integer> {
 
 
     public IntegerNumArray dot(IntegerNumArray target) {
+        if (ndim == 1 && target.ndim == 1) {
+            int sum = 0;
+            int num = layerLength(0);
+            for (int i = 0;i < num;i++) {
+                sum += internalData[i] * target.internalData[i];
+            }
+            IntegerNumArray result = new IntegerNumArray(1);
+            result.set(sum, 0);
+            return result;
+        }
+
         int num1 = layerLength(0);
         int num2 = layerLength(1);
         int targetNum1 = target.layerLength(0);
@@ -72,14 +83,17 @@ public class IntegerNumArray extends MyNumBase<Integer> {
             }
             return ret;
         } else {
-            IntegerNumArray ret = new IntegerNumArray(num2);
-            for (int i = 0;i < num2;i++) {
-                int sum = 0;
-                for (int j = 0;j < num1;j++) {
-                    sum += get(j, i) * target.get(j);
+            IntegerNumArray ret = new IntegerNumArray(num1, target.layerLength(1));
+            for (int i = 0;i < num1;i++) {
+                for (int j = 0;j < target.layerLength(1);j++) {
+                    int value = 0;
+                    for (int k = 0;k < num2;k++) {
+                        value += get(i, k) * target.get(k, j);
+                    }
+                    ret.set(value, i, j);
                 }
-                ret.set(sum, i);
             }
+
             return ret;
         }
     }

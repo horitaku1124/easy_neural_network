@@ -8,7 +8,7 @@ import static org.junit.Assert.assertThat;
 
 public class MyNumArrayTest {
     @Test
-    public void test1() {
+    public void verifySetAndGetWorks2d () {
         MyNumArray num = new MyNumArray(2, 4);
         num.set(1.0f, 0, 0);
         num.set(2.0f, 0, 1);
@@ -25,7 +25,7 @@ public class MyNumArrayTest {
         assertThat((double)num.get(1, 3), is(closeTo(8.0f, 0.001f)));
     }
     @Test
-    public void test2() {
+    public void verifySetAndGetWorks3d() {
         MyNumArray num = new MyNumArray(2, 3, 4);
         num.set(1.0f, 0, 0, 0);
         num.set(2.0f, 0, 0, 1);
@@ -44,7 +44,7 @@ public class MyNumArrayTest {
         assertThat((double)num.get(1, 2, 3), is(closeTo(23.0f, 0.001f)));
     }
     @Test
-    public void test3() {
+    public void verifySetAndGetWorks4d() {
         MyNumArray num = new MyNumArray(2, 3, 4, 5);
         num.set(1.0f, 0, 0, 0, 0);
         num.set(2.0f, 0, 0, 1, 0);
