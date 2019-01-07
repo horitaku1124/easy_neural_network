@@ -104,4 +104,32 @@ public class IntegerNumArrayTest {
         assertThat(result.get(3, 1), is(28));
         assertThat(result.get(3, 2), is(36));
     }
+
+    @Test
+    public void verifyTransposeWorks() {
+        IntegerNumArray target;
+
+        target = new IntegerNumArray(new Integer[][] {
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9},
+                {10, 11, 12},
+        });
+        IntegerNumArray result = target.transpose();
+        assertThat(result.ndim, is(2));
+        assertThat(result.get(0, 0), is(1));
+        assertThat(result.get(0, 1), is(4));
+        assertThat(result.get(0, 2), is(7));
+        assertThat(result.get(0, 3), is(10));
+        assertThat(result.get(1, 0), is(2));
+        assertThat(result.get(1, 1), is(5));
+        assertThat(result.get(1, 2), is(8));
+        assertThat(result.get(1, 3), is(11));
+        assertThat(result.get(2, 0), is(3));
+        assertThat(result.get(2, 1), is(6));
+        assertThat(result.get(2, 2), is(9));
+        assertThat(result.get(2, 3), is(12));
+        assertThat(result.shape, is(new int[]{3, 4}));
+    }
+
 }

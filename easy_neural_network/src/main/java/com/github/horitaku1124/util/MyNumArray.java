@@ -442,6 +442,13 @@ public class MyNumArray {
         }
     }
 
-    public void transpose() {
+    public MyNumArray transpose() {
+        MyNumArray result = new MyNumArray(shape[1], shape[0]);
+        for (int i = 0;i < shape[0];i++) {
+            for (int j = 0;j < shape[1];j++) {
+                result.set(this.get(i, j), j, i);
+            }
+        }
+        return result;
     }
 }
