@@ -16,8 +16,20 @@ public class NNTest {
 
     private static void forwardPropagation(MyNumArray x) {
         middleLayer1.forward(x);
-        middleLayer2.forward(x);
-        outputLayer.forward(x);
+        middleLayer2.forward(middleLayer1.y);
+        outputLayer.forward(middleLayer2.y);
+    }
+
+    private static void backPropagation(MyNumArray t) {
+        outputLayer.backward(t);;
+        middleLayer2.backward(outputLayer.grad_x);
+        middleLayer1.backward(middleLayer2.grad_x);
+    }
+
+    private static void updateWb(float eta) {
+        middleLayer1.update(eta);
+        middleLayer2.update(eta);
+        outputLayer.update(eta);
     }
 
     public static void main(String[] args) throws IOException {
@@ -80,6 +92,11 @@ public class NNTest {
 
         for (int i = 0;i < epoch;i++) {
             forwardPropagation(inputTrain);
+            forwardPropagation(inputTest);
+
+            float indexRandom = MyNumArray.arange(n_train);
+            MyNumArray.rand().suffle();
+
         }
     }
 }

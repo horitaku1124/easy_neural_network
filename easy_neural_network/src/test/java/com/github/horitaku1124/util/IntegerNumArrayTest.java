@@ -132,4 +132,46 @@ public class IntegerNumArrayTest {
         assertThat(result.shape, is(new int[]{3, 4}));
     }
 
+    @Test
+    public void verifySum() {
+        IntegerNumArray target;
+        target = new IntegerNumArray(new Integer[][] {
+                {1, 2, 3},
+                {4, 5, 6}
+        });
+        IntegerNumArray result = IntegerNumArray.sum(target);
+
+        assertThat(result.ndim, is(1));
+        assertThat(result.get(0), is(21));
+
+        result = IntegerNumArray.sum(target, 0, false);
+        assertThat(result.ndim, is(1));
+        assertThat(result.shape[0], is(3));
+        assertThat(result.get(0), is(5));
+        assertThat(result.get(1), is(7));
+        assertThat(result.get(2), is(9));
+
+        result = IntegerNumArray.sum(target, 1, false);
+        assertThat(result.ndim, is(1));
+        assertThat(result.shape[0], is(2));
+        assertThat(result.get(0), is(6));
+        assertThat(result.get(1), is(15));
+
+        result = IntegerNumArray.sum(target, 0, true);
+        assertThat(result.ndim, is(2));
+        assertThat(result.shape[0], is(target.shape[0]));
+        assertThat(result.shape[1], is(target.shape[1]));
+        assertThat(result.get(0, 0), is(5));
+        assertThat(result.get(0, 1), is(7));
+        assertThat(result.get(0, 2), is(9));
+
+        result = IntegerNumArray.sum(target, 1, true);
+        assertThat(result.ndim, is(2));
+        assertThat(result.shape[0], is(target.shape[0]));
+        assertThat(result.shape[1], is(target.shape[1]));
+        assertThat(result.shape[0], is(2));
+        assertThat(result.get(0, 0), is(6));
+        assertThat(result.get(0, 1), is(15));
+    }
+
 }

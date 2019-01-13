@@ -149,4 +149,47 @@ public class IntegerNumArray extends MyNumBase<Integer> {
         }
         return result;
     }
+
+    public static IntegerNumArray sum(IntegerNumArray x) {
+        return sum(x, null, false);
+    }
+
+    public static IntegerNumArray sum(IntegerNumArray x, Integer axis, boolean keepDims) {
+        IntegerNumArray ret = null;
+        if (axis == null) {
+            ret = keepDims ? new IntegerNumArray(x.shape) : new IntegerNumArray(1);
+            int sum = 0;
+            for (int i = 0;i < x.size;i++) {
+                sum += x.internalData[i];
+            }
+            ret.internalData[0] = sum;
+        } else if (axis == 0) {
+            ret = keepDims ? new IntegerNumArray(x.shape) : new IntegerNumArray(x.shape[1]);
+            for (int i = 0;i < x.shape[1];i++) {
+                int sum = 0;
+                for (int j = 0;j < x.shape[0];j++) {
+                    sum += x.get(j, i);
+                }
+                if (keepDims) {
+                    ret.set(sum, 0, i);
+                } else {
+                    ret.set(sum, i);
+                }
+            }
+        } else if (axis == 1) {
+            ret = keepDims ? new IntegerNumArray(x.shape) : new IntegerNumArray(x.shape[0]);
+            for (int i = 0;i < x.shape[0];i++) {
+                int sum = 0;
+                for (int j = 0;j < x.shape[1];j++) {
+                    sum += x.get(i, j);
+                }
+                if (keepDims) {
+                    ret.set(sum, 0, i);
+                } else {
+                    ret.set(sum, i);
+                }
+            }
+        }
+        return ret;
+    }
 }

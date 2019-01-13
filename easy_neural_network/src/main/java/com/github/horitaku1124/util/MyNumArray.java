@@ -62,6 +62,7 @@ public class MyNumArray {
         internalData = new float[(int) size];
     }
 
+
     public int size() {
         return (int)size;
     }
@@ -306,6 +307,14 @@ public class MyNumArray {
         return result;
     }
 
+    public MyNumArray divide(MyNumArray divide) {
+        MyNumArray ret = new MyNumArray(divide.shape);
+        for (int i = 0;i < divide.size;i++) {
+            ret.internalData[i] = internalData[i] / divide.internalData[i];
+        }
+        return ret;
+    }
+
 
     public static MyNumArray std(MyNumArray input, int axis) {
         int len = input.layerLength(0);
@@ -450,5 +459,56 @@ public class MyNumArray {
             }
         }
         return result;
+    }
+
+    public static MyNumArray sum(MyNumArray x) {
+        return sum(x, null, false);
+    }
+
+    public static MyNumArray sum(MyNumArray x, Integer axis, boolean keepDims) {
+        MyNumArray ret = null;
+        if (axis == null) {
+            ret = keepDims ? new MyNumArray(x.shape) : new MyNumArray(1);
+            float sum = 0;
+            for (int i = 0;i < x.size;i++) {
+                sum += x.internalData[i];
+            }
+            ret.internalData[0] = sum;
+        } else if (axis == 0) {
+            ret = keepDims ? new MyNumArray(x.shape) : new MyNumArray(x.shape[1]);
+            for (int i = 0;i < x.shape[1];i++) {
+                float sum = 0;
+                for (int j = 0;j < x.shape[0];j++) {
+                    sum += x.get(j, i);
+                }
+                if (keepDims) {
+                    ret.set(sum, 0, i);
+                } else {
+                    ret.set(sum, i);
+                }
+            }
+        } else if (axis == 1) {
+            ret = keepDims ? new MyNumArray(x.shape) : new MyNumArray(x.shape[0]);
+            for (int i = 0;i < x.shape[0];i++) {
+                float sum = 0;
+                for (int j = 0;j < x.shape[1];j++) {
+                    sum += x.get(i, j);
+                }
+                if (keepDims) {
+                    ret.set(sum, 0, i);
+                } else {
+                    ret.set(sum, i);
+                }
+            }
+        }
+        return ret;
+    }
+
+    public static MyNumArray exp(MyNumArray x) {
+        MyNumArray ret = new MyNumArray(x.shape);
+        for (int i = 0;i < ret.size;i++) {
+            ret.internalData[i] = (float) Math.pow(Math.E, x.internalData[i]);
+        }
+        return ret;
     }
 }
