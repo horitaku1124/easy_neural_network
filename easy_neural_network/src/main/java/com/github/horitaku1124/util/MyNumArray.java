@@ -239,6 +239,10 @@ public class MyNumArray {
         return IntStream.range(0, num).filter(filter).toArray();
     }
 
+    public static int[] arange(int num) {
+        return IntStream.range(0, num).toArray();
+    }
+
     public static MyNumArray average(MyNumArray input, int axis) {
         int wide = input.layerLength(1);
         MyNumArray average = new MyNumArray(wide);
@@ -510,5 +514,26 @@ public class MyNumArray {
             ret.internalData[i] = (float) Math.pow(Math.E, x.internalData[i]);
         }
         return ret;
+    }
+
+    public void shuffle(int[] array) {
+        float[] sortGuide = new float[(int) size];
+        for (int i = 0;i < size;i++) {
+            sortGuide[i] = (float) Math.random();
+        }
+
+        for (int i = 0;i < size - 1;size++) {
+            for (int j = i + 1;j < size;j++) {
+                if (sortGuide[i] > sortGuide[j]) {
+                    int temp1 = array[i];
+                    array[i] = array[j];
+                    array[j] = temp1;
+
+                    float temp = sortGuide[i];
+                    sortGuide[i] = sortGuide[j];
+                    sortGuide[j] = temp;
+                }
+            }
+        }
     }
 }

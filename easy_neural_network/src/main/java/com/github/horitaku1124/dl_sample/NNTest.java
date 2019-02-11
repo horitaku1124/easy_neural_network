@@ -72,8 +72,8 @@ public class NNTest {
         MyNumArray inputTest = irisImageData.getIn(index_test);
         MyNumArray correctTest = irisLabelData.getIn(index_test);
 
-        int n_train = inputTrain.layerLength(0);
-        int n_test = inputTest.layerLength(0);
+        int n_train = inputTrain.layerLength(0); // 訓練データに使う数
+        int n_test = inputTest.layerLength(0); // テストデータに数
 
         int n_in = 4;
         int n_mid = 25;
@@ -94,8 +94,10 @@ public class NNTest {
             forwardPropagation(inputTrain);
             forwardPropagation(inputTest);
 
-            float indexRandom = MyNumArray.arange(n_train);
-            MyNumArray.rand().suffle();
+            int[] indexRandom = MyNumArray.arange(n_train);
+            MyNumArray.rand().shuffle(indexRandom);
+
+            for (int j = 0;j < n_batch)
 
         }
     }
