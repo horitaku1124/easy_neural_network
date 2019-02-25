@@ -3,8 +3,10 @@ package com.github.horitaku1124.dl_sample;
 import com.github.horitaku1124.dl_sample.layer.LayerBase;
 import com.github.horitaku1124.dl_sample.layer.MiddleLayer;
 import com.github.horitaku1124.dl_sample.layer.OutputLayer;
+import com.github.horitaku1124.util.ArrayWarp;
 import com.github.horitaku1124.util.CSVReader;
 import com.github.horitaku1124.util.MyNumArray;
+import com.github.horitaku1124.util.WarpMyNumArray;
 
 import java.io.IOException;
 
@@ -12,7 +14,6 @@ public class NNTest {
     static MiddleLayer middleLayer1;
     static MiddleLayer middleLayer2;
     static OutputLayer outputLayer;
-
 
     private static void forwardPropagation(MyNumArray x) {
         middleLayer1.forward(x);
@@ -30,6 +31,9 @@ public class NNTest {
         middleLayer1.update(eta);
         middleLayer2.update(eta);
         outputLayer.update(eta);
+    }
+    private static float getError(MyNumArray t, int batch_size) {
+        return MyNumArray.sum(t * )
     }
 
     public static void main(String[] args) throws IOException {
@@ -79,11 +83,15 @@ public class NNTest {
         int n_mid = 25;
         int n_out = 3;
 
-        double wb_width = 0.1;
-        double eta = 0.01;
+        float wb_width = 0.1f;
+        float eta = 0.01f;
         int epoch = 1000;
         int batch_size = 8;
         int interval = 100;
+
+
+        // -- 学習と経過の記録 --
+        int n_batch = n_train /batch_size; //  1エポックあたりのバッチ数
 
         middleLayer1 = new MiddleLayer(n_in, n_mid);
         middleLayer2 = new MiddleLayer(n_mid, n_mid);
@@ -91,13 +99,27 @@ public class NNTest {
 
 
         for (int i = 0;i < epoch;i++) {
+            //  -- 誤差の計測 --
             forwardPropagation(inputTrain);
+            float error_train;
             forwardPropagation(inputTest);
+            float error_test;
 
             int[] indexRandom = MyNumArray.arange(n_train);
             MyNumArray.rand().shuffle(indexRandom);
 
-            for (int j = 0;j < n_batch)
+            // -- 経過の表示 --
+            if (i % interval == 0) {
+                System.out.format("Epoch:%d/%d Error_train: %f Error_test:", error_train, error_test);
+            }
+            for (int j = 0;j < n_batch;j++) {
+                ArrayWarp mb_index = new ArrayWarp(indexRandom, j * batch_size, (j + 1) * batch_size);
+                WarpMyNumArray x = new WarpMyNumArray(inputTrain, mb_index);
+                WarpMyNumArray t = new WarpMyNumArray(correctTrain, mb_index);
+                forwardPropagation(x);
+                backPropagation(t);
+                updateWb(eta);
+            }
 
         }
     }
