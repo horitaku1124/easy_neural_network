@@ -4,6 +4,75 @@
 <meta charset="UTF-8">
 <title>Game</title>
 <script>
+class DBSCANClustering {
+    inputValues = [];
+    minNumElements = 2;
+    epsilon = 1.0;
+    visitedPoints = new Set(); // should be Set
+    metric = (a, b) => 0;
+
+    constructor(inputValues, minNumElements, epsilon, metric) {
+        this.inputValues = inputValues;
+        this.minNumElements = minNumElements;
+        this.epsilon = epsilon;
+        this.metric = metric;
+    }
+
+    getNeighbours(verifyValues) {
+        let neighbours = [];
+        for (let candidate of this.inputValues) {
+            if (this.metric(verifyValues, candidate) <= this.epsilon) {
+                neighbours.push(candidate)
+            }
+        }
+        return neighbours;
+    }
+
+    static mergeRightToLeftCollection(neighbours1, neighbours2) {
+        for (let tempPt of neighbours2) {
+            if (!neighbours1.contains(tempPt)) {
+                neighbours1.push(tempPt);
+            }
+        }
+        return neighbours1;
+    }
+
+    performClustering() {
+        let resultList = [];
+        this.visitedPoints.clear();
+
+        let neighbours = [];
+        let index = 0;
+        while (this.inputValues.length > index) {
+            let p = this.inputValues[index];
+            if (!this.visitedPoints.has(p)) {
+                this.visitedPoints.add(p);
+                let neighbours = this.getNeighbours(p);
+
+                if (neighbours.length >= this.minNumElements) {
+                    let ind = 0;
+                    while (neighbours.length > ind) {
+                        let r = neighbours[ind];
+                        if (!this.visitedPoints.has(r)) {
+                            this.visitedPoints.add(r);
+                            let individualNeighbours = this.getNeighbours(r);
+                            if (individualNeighbours.length >= this.minNumElements) {
+                                neighbours = DBSCANClustering.mergeRightToLeftCollection(
+                                    neighbours, individualNeighbours)
+                            }
+                        }
+                        ind++
+                    }
+                    resultList.push(neighbours)
+                }
+            }
+            index++
+        }
+        return resultList;
+    }
+}
+</script>
+<script>
     let mainDisplay;
     let debugDisplay;
     document.addEventListener('DOMContentLoaded', () => {
