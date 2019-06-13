@@ -1,57 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Game</title>
-    <script>
-        let mainDisplay;
-        let debugDisplay;
-        document.addEventListener('DOMContentLoaded', () => {
-            mainDisplay = document.getElementById('main_display');
-            debugDisplay = document.getElementById('debug_display');
-            if (!mainDisplay || !mainDisplay.getContext) {
-                throw Error('Context');
-            }
-            let ctx = mainDisplay.getContext('2d');
-            ctx.beginPath();
-            ctx.fillStyle = 'green';
-            ctx.arc(70, 70, 30, 0, 2 * Math.PI, true);
-            ctx.fill();
-
-            if (debugDisplay && debugDisplay.getContext) {
-                let ctx2 = debugDisplay.getContext('2d');
-                let imageData = ctx.getImageData(0, 0, mainDisplay.width, mainDisplay.height);
-                let data = imageData.data;
-                for (let i = 0; i < data.length; i += 4) {
-                    let avg = (data[i] + data[i +1] + data[i +2]) / 3;
-                    data[i]     = avg; // red
-                    data[i + 1] = avg; // green
-                    data[i + 2] = avg; // blue
-                }
-                for (let y = 0;y < mainDisplay.height - 1;y++) {
-                    let y0 = y * mainDisplay.width;
-                    for (let x = 0;x < mainDisplay.width - 1;x++) {
-                        let xx = (y0 + x) * 4;
-                        let xxx = (y0 + mainDisplay.width + x) * 4;
-                        data[xx] = parseInt(Math.abs(
-                            data[xx + 4] - data[xx] + data[xxx] - data[xx] + data[xxx + 4] - data[xx]
-                        ));
-                        data[xx + 1] = data[xx];
-                        data[xx + 2] = data[xx + 1];
-                        data[xx + 3] = 255;
-                    }
-                }
-
-                ctx2.putImageData(imageData, 0, 0);
-            }
-
-        });
-    </script>
-    <style>
-        canvas {
-            border: 1px solid #aaa;
+<meta charset="UTF-8">
+<title>Game</title>
+<script>
+    let mainDisplay;
+    let debugDisplay;
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOMContentLoaded", performance.now());
+        mainDisplay = document.getElementById('main_display');
+        debugDisplay = document.getElementById('debug_display');
+        if (!mainDisplay || !mainDisplay.getContext) {
+            throw Error('Context');
         }
-    </style>
+        let ctx = mainDisplay.getContext('2d');
+        ctx.beginPath();
+        ctx.fillStyle = 'green';
+        ctx.arc(70, 70, 30, 0, 2 * Math.PI, true);
+        ctx.fill();
+
+        console.log("paint done", performance.now());
+        if (debugDisplay && debugDisplay.getContext) {
+            let ctx2 = debugDisplay.getContext('2d');
+            let imageData = ctx.getImageData(0, 0, mainDisplay.width, mainDisplay.height);
+            let data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                let avg = (data[i] + data[i +1] + data[i +2]) / 3;
+                data[i]     = avg; // red
+                data[i + 1] = avg; // green
+                data[i + 2] = avg; // blue
+            }
+            for (let y = 0;y < mainDisplay.height - 1;y++) {
+                let y0 = y * mainDisplay.width;
+                for (let x = 0;x < mainDisplay.width - 1;x++) {
+                    let xx = (y0 + x) * 4;
+                    let xxx = (y0 + mainDisplay.width + x) * 4;
+                    data[xx] = parseInt(Math.abs(
+                        data[xx + 4] - data[xx] + data[xxx] - data[xx] + data[xxx + 4] - data[xx]
+                    ));
+                    data[xx + 1] = data[xx];
+                    data[xx + 2] = data[xx + 1];
+                    data[xx + 3] = 255;
+                }
+            }
+
+            ctx2.putImageData(imageData, 0, 0);
+        }
+        console.log("putImageData done", performance.now());
+
+    });
+</script>
+<style>
+    canvas {
+        border: 1px solid #aaa;
+    }
+</style>
 </head>
 <body>
 <canvas id="main_display" width="400" height="300"></canvas><br><br>
