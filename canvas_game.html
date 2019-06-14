@@ -18,11 +18,12 @@ class DBSCANClustering {
         this.metric = metric;
     }
 
-    getNeighbours(verifyValues) {
+    getNeighbours(jsonValue) {
+        let verifyValue2 = JSON.parse(jsonValue);
         let neighbours = [];
         for (let candidate of this.inputValues) {
-            if (this.metric(verifyValues, candidate) <= this.epsilon) {
-                neighbours.push(candidate)
+            if (this.metric(verifyValue2, candidate) <= this.epsilon) {
+                neighbours.push(JSON.stringify(candidate));
             }
         }
         return neighbours;
@@ -30,7 +31,7 @@ class DBSCANClustering {
 
     static mergeRightToLeftCollection(neighbours1, neighbours2) {
         for (let tempPt of neighbours2) {
-            if (!neighbours1.contains(tempPt)) {
+            if (!neighbours1.includes(tempPt)) {
                 neighbours1.push(tempPt);
             }
         }
@@ -45,17 +46,19 @@ class DBSCANClustering {
         let index = 0;
         while (this.inputValues.length > index) {
             let p = this.inputValues[index];
-            if (!this.visitedPoints.has(p)) {
-                this.visitedPoints.add(p);
-                let neighbours = this.getNeighbours(p);
+            let inputValue = JSON.stringify(p);
+            if (!this.visitedPoints.has(inputValue)) {
+                this.visitedPoints.add(inputValue);
+                let neighbours = this.getNeighbours(inputValue);
 
                 if (neighbours.length >= this.minNumElements) {
                     let ind = 0;
                     while (neighbours.length > ind) {
-                        let r = neighbours[ind];
-                        if (!this.visitedPoints.has(r)) {
-                            this.visitedPoints.add(r);
-                            let individualNeighbours = this.getNeighbours(r);
+                        let jsonNeighbour = neighbours[ind];
+                        // let jsonNeighbour = JSON.stringify(r);
+                        if (!this.visitedPoints.has(jsonNeighbour)) {
+                            this.visitedPoints.add(jsonNeighbour);
+                            let individualNeighbours = this.getNeighbours(jsonNeighbour);
                             if (individualNeighbours.length >= this.minNumElements) {
                                 neighbours = DBSCANClustering.mergeRightToLeftCollection(
                                     neighbours, individualNeighbours)
@@ -68,8 +71,20 @@ class DBSCANClustering {
             }
             index++
         }
+        for (let i = 0;i < resultList.length;i++) {
+            let cluster = resultList[i];
+            for (let j = 0;j < cluster.length;j++) {
+                cluster[j] = JSON.parse(cluster[j]);
+            }
+            resultList[i] = cluster;
+        }
+
         return resultList;
     }
+}
+
+const metric = (v1, v2) => {
+    return Math.sqrt(Math.pow(v1[0] - v2[0], 2) + Math.pow(v1[1] - v2[1], 2));
 }
 </script>
 <script>
@@ -87,12 +102,21 @@ class DBSCANClustering {
         ctx.fillStyle = 'green';
         ctx.arc(70, 70, 30, 0, 2 * Math.PI, true);
         ctx.fill();
-
+        ctx.beginPath();
+        ctx.arc(270, 90, 15, 0, 2 * Math.PI, true);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(100, 150, 5, 0, 2 * Math.PI, true);
+        ctx.fill();
+        detect(ctx);
         console.log("paint done", performance.now());
+    });
+    function detect(ctx) {
         if (debugDisplay && debugDisplay.getContext) {
             let ctx2 = debugDisplay.getContext('2d');
             let imageData = ctx.getImageData(0, 0, mainDisplay.width, mainDisplay.height);
             let data = imageData.data;
+            let inputValues = [];
             for (let i = 0; i < data.length; i += 4) {
                 let avg = (data[i] + data[i +1] + data[i +2]) / 3;
                 data[i]     = avg; // red
@@ -107,17 +131,53 @@ class DBSCANClustering {
                     data[xx] = parseInt(Math.abs(
                         data[xx + 4] - data[xx] + data[xxx] - data[xx] + data[xxx + 4] - data[xx]
                     ));
+                    if (data[xx] > 0.0) {
+                        inputValues.push([x, y]);
+                    }
                     data[xx + 1] = data[xx];
                     data[xx + 2] = data[xx + 1];
                     data[xx + 3] = 255;
                 }
             }
+            // console.log(inputValues);
 
             ctx2.putImageData(imageData, 0, 0);
-        }
-        console.log("putImageData done", performance.now());
+            console.log("putImageData done", performance.now());
 
-    });
+            let dbscan = new DBSCANClustering(inputValues, 2, 1, metric);
+            let clusters = dbscan.performClustering();
+            console.log(clusters);
+            for (let cluster of clusters) {
+                let minX = Number.MAX_VALUE;
+                let minY = Number.MAX_VALUE;
+                let maxX = Number.MIN_VALUE;
+                let maxY = Number.MIN_VALUE;
+                for (let [ax, ay] of cluster) {
+                    if (minX > ax) {
+                        minX = ax;
+                    }
+                    if (minY > ay) {
+                        minY = ay;
+                    }
+                    if (maxX < ax) {
+                        maxX = ax;
+                    }
+                    if (maxY < ay) {
+                        maxY = ay;
+                    }
+                }
+                console.log(minX, minY, maxX, maxY);
+
+                ctx2.beginPath();
+                ctx2.strokeStyle = "red";
+                ctx2.rect(minX, minY, maxX - minX, maxY - minY);
+                ctx2.stroke();
+            }
+
+
+            console.log("clustering done", performance.now());
+        }
+    }
 </script>
 <style>
     canvas {
@@ -126,7 +186,7 @@ class DBSCANClustering {
 </style>
 </head>
 <body>
-<canvas id="main_display" width="400" height="300"></canvas><br><br>
-<canvas id="debug_display" width="400" height="300"></canvas>
+<canvas id="main_display" width="600" height="300"></canvas><br><br>
+<canvas id="debug_display" width="600" height="300"></canvas>
 </body>
 </html>
