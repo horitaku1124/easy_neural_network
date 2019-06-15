@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Game</title>
 <script>
-class DBSCANClustering {
+class _DBSCANClustering {
     // TODO field declaration are not fully supported
     // inputValues = [];
     // minNumElements = 2;
@@ -92,6 +92,7 @@ const metric = (v1, v2) => {
 <script>
     let mainDisplay;
     let debugDisplay;
+    let worker = new Worker('doWork.js');
     document.addEventListener('DOMContentLoaded', () => {
         console.log("DOMContentLoaded", performance.now());
         mainDisplay = document.getElementById('main_display');
@@ -110,14 +111,38 @@ const metric = (v1, v2) => {
         ctx.beginPath();
         ctx.arc(100, 150, 5, 0, 2 * Math.PI, true);
         ctx.fill();
-        detect(ctx);
+        // let img = new Image();
+        // img.src = "./img1.png";
+        // img.onload = () => {
+        //     ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, mainDisplay.width, mainDisplay.height);
         console.log("paint done", performance.now());
+        detect(ctx);
+        // };
+
+        worker.addEventListener('message', function(e) {
+            console.log("worker finished", performance.now());
+
+            for (let [minX, minY, maxX, maxY] of e.data) {
+                ctx.beginPath();
+                ctx.strokeStyle = "red";
+                ctx.rect(minX, minY, maxX - minX, maxY - minY);
+                ctx.stroke();
+            }
+        }, false);
+
+        // worker.postMessage('Hello World'); // Send data to our worker.
     });
     function detect(ctx) {
         if (debugDisplay && debugDisplay.getContext) {
             let ctx2 = debugDisplay.getContext('2d');
             let imageData = ctx.getImageData(0, 0, mainDisplay.width, mainDisplay.height);
             let data = imageData.data;
+            worker.postMessage({
+                "imageData": imageData.data,
+                "width": mainDisplay.width,
+                "height": mainDisplay.height,
+            });
+            /*
             let inputValues = [];
             for (let i = 0; i < data.length; i += 4) {
                 let avg = (data[i] + data[i +1] + data[i +2]) / 3;
@@ -146,9 +171,9 @@ const metric = (v1, v2) => {
             ctx2.putImageData(imageData, 0, 0);
             console.log("putImageData done", performance.now());
 
-            let dbscan = new DBSCANClustering(inputValues, 2, 1, metric);
+            let dbscan = new _DBSCANClustering(inputValues, 2, 1, metric);
             let clusters = dbscan.performClustering();
-            console.log(clusters);
+            // console.log(clusterss);
             for (let cluster of clusters) {
                 let minX = Number.MAX_VALUE;
                 let minY = Number.MAX_VALUE;
@@ -175,9 +200,7 @@ const metric = (v1, v2) => {
                 ctx2.rect(minX, minY, maxX - minX, maxY - minY);
                 ctx2.stroke();
             }
-
-
-            console.log("clustering done", performance.now());
+            */
         }
     }
 </script>
