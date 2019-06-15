@@ -5,17 +5,19 @@
 <title>Game</title>
 <script>
 class DBSCANClustering {
-    inputValues = [];
-    minNumElements = 2;
-    epsilon = 1.0;
-    visitedPoints = new Set(); // should be Set
-    metric = (a, b) => 0;
+    // TODO field declaration are not fully supported
+    // inputValues = [];
+    // minNumElements = 2;
+    // epsilon = 1.0;
+    // visitedPoints = new Set(); // should be Set
+    // metric = (a, b) => 0;
 
     constructor(inputValues, minNumElements, epsilon, metric) {
         this.inputValues = inputValues;
         this.minNumElements = minNumElements;
         this.epsilon = epsilon;
         this.metric = metric;
+        this.visitedPoints = new Set();
     }
 
     getNeighbours(jsonValue) {
