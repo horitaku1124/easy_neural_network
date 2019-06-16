@@ -86,7 +86,7 @@ const euclidean = (v1, v2) => {
 
 
 self.addEventListener('message', function(e) {
-  console.log("start worker", performance.now());
+  // console.log("start worker", performance.now());
   let postData = e.data;
   let data = postData.imageData;
   let inputValues = [];
@@ -112,9 +112,6 @@ self.addEventListener('message', function(e) {
           data[xx + 3] = 255;
       }
   }
-  // console.log(inputValues);
-
-  // ctx2.putImageData(imageData, 0, 0);
 
   let dbscan = new DBSCANClustering(inputValues, 2, 1, euclidean);
   let clusters = dbscan.performClustering();
@@ -139,16 +136,8 @@ self.addEventListener('message', function(e) {
               maxY = ay;
           }
       }
-      // console.log(minX, minY, maxX, maxY);
       foundPoints.push([minX, minY, maxX, maxY]);
-      //
-      // ctx2.beginPath();
-      // ctx2.strokeStyle = "red";
-      // ctx2.rect(minX, minY, maxX - minX, maxY - minY);
-      // ctx2.stroke();
   }
-
-  console.log("finish worker", performance.now());
 
   self.postMessage(foundPoints);
 }, false);

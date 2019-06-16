@@ -90,119 +90,83 @@ const metric = (v1, v2) => {
 }
 </script>
 <script>
-    let mainDisplay;
-    let debugDisplay;
-    let worker = new Worker('doWork.js');
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log("DOMContentLoaded", performance.now());
-        mainDisplay = document.getElementById('main_display');
-        debugDisplay = document.getElementById('debug_display');
-        if (!mainDisplay || !mainDisplay.getContext) {
-            throw Error('Context');
-        }
-        let ctx = mainDisplay.getContext('2d');
-        ctx.beginPath();
-        ctx.fillStyle = 'green';
-        ctx.arc(70, 70, 30, 0, 2 * Math.PI, true);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(270, 90, 15, 0, 2 * Math.PI, true);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(100, 150, 5, 0, 2 * Math.PI, true);
-        ctx.fill();
-        // let img = new Image();
-        // img.src = "./img1.png";
-        // img.onload = () => {
-        //     ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, mainDisplay.width, mainDisplay.height);
-        console.log("paint done", performance.now());
-        detect(ctx);
-        // };
+let mainDisplay;
+let debugDisplay;
+let worker = new Worker('doWork.js');
+let ctx;
+let ctx2;
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOMContentLoaded", performance.now());
+    mainDisplay = document.getElementById('main_display');
+    debugDisplay = document.getElementById('debug_display');
+    if (!mainDisplay || !mainDisplay.getContext) {
+        throw Error('Context');
+    }
+    ctx = mainDisplay.getContext('2d');
+    ctx2 = debugDisplay.getContext('2d');
 
-        worker.addEventListener('message', function(e) {
-            console.log("worker finished", performance.now());
+    let stoneImg = new Image();
+    stoneImg.src = "irasutoya/ishi_stone.png";
+    let allResourcesAreLoaded = false;
+    stoneImg.onload = () => {
+        allResourcesAreLoaded = true;
+    };
 
-            for (let [minX, minY, maxX, maxY] of e.data) {
-                ctx.beginPath();
-                ctx.strokeStyle = "red";
-                ctx.rect(minX, minY, maxX - minX, maxY - minY);
-                ctx.stroke();
+    let detectedObjects = [];
+    worker.addEventListener('message', function(e) {
+        console.log("worker finished", performance.now() - startedAt, e.data);
+        detectedObjects = e.data
+        detectStart();
+    }, false);
+
+    let stoneX = mainDisplay.width;
+    let animationFrame = function(timestamp) {
+        if (allResourcesAreLoaded) {
+            ctx.fillStyle = "#FFF";
+            ctx.fillRect(0, 0, mainDisplay.width, mainDisplay.height);
+            // ctx.stroke();
+            ctx.drawImage(stoneImg, 0, 0, stoneImg.width, stoneImg.height, stoneX, 50, stoneImg.width / 3, stoneImg.height / 3);
+
+            ctx.stroke();
+            stoneX--;
+            if (stoneX + stoneImg.width < 0) {
+                stoneX = mainDisplay.width;
             }
-        }, false);
 
-        // worker.postMessage('Hello World'); // Send data to our worker.
-    });
-    function detect(ctx) {
-        if (debugDisplay && debugDisplay.getContext) {
-            let ctx2 = debugDisplay.getContext('2d');
             let imageData = ctx.getImageData(0, 0, mainDisplay.width, mainDisplay.height);
-            let data = imageData.data;
-            worker.postMessage({
-                "imageData": imageData.data,
-                "width": mainDisplay.width,
-                "height": mainDisplay.height,
-            });
-            /*
-            let inputValues = [];
-            for (let i = 0; i < data.length; i += 4) {
-                let avg = (data[i] + data[i +1] + data[i +2]) / 3;
-                data[i]     = avg; // red
-                data[i + 1] = avg; // green
-                data[i + 2] = avg; // blue
-            }
-            for (let y = 0;y < mainDisplay.height - 1;y++) {
-                let y0 = y * mainDisplay.width;
-                for (let x = 0;x < mainDisplay.width - 1;x++) {
-                    let xx = (y0 + x) * 4;
-                    let xxx = (y0 + mainDisplay.width + x) * 4;
-                    data[xx] = parseInt(Math.abs(
-                        data[xx + 4] - data[xx] + data[xxx] - data[xx] + data[xxx + 4] - data[xx]
-                    ));
-                    if (data[xx] > 0.0) {
-                        inputValues.push([x, y]);
-                    }
-                    data[xx + 1] = data[xx];
-                    data[xx + 2] = data[xx + 1];
-                    data[xx + 3] = 255;
-                }
-            }
-            // console.log(inputValues);
-
             ctx2.putImageData(imageData, 0, 0);
-            console.log("putImageData done", performance.now());
 
-            let dbscan = new _DBSCANClustering(inputValues, 2, 1, metric);
-            let clusters = dbscan.performClustering();
-            // console.log(clusterss);
-            for (let cluster of clusters) {
-                let minX = Number.MAX_VALUE;
-                let minY = Number.MAX_VALUE;
-                let maxX = Number.MIN_VALUE;
-                let maxY = Number.MIN_VALUE;
-                for (let [ax, ay] of cluster) {
-                    if (minX > ax) {
-                        minX = ax;
-                    }
-                    if (minY > ay) {
-                        minY = ay;
-                    }
-                    if (maxX < ax) {
-                        maxX = ax;
-                    }
-                    if (maxY < ay) {
-                        maxY = ay;
-                    }
-                }
-                console.log(minX, minY, maxX, maxY);
+            window.requestAnimationFrame(animationFrame);
+            imageData = ctx2.getImageData(0, 0, mainDisplay.width, mainDisplay.height);
+            imageDataUint = new Uint8ClampedArray(imageData.data);
 
+            for (let [minX, minY, maxX, maxY] of detectedObjects) {
                 ctx2.beginPath();
                 ctx2.strokeStyle = "red";
                 ctx2.rect(minX, minY, maxX - minX, maxY - minY);
                 ctx2.stroke();
             }
-            */
         }
+    };
+    window.requestAnimationFrame(animationFrame);
+    detectStart();
+});
+
+
+let imageDataUint;
+let startedAt;
+function detectStart() {
+    if (imageDataUint && imageDataUint.length > 0) {
+        worker.postMessage({
+            "imageData": imageDataUint,
+            "width": mainDisplay.width,
+            "height": mainDisplay.height,
+        });
+        startedAt = performance.now();
+    } else {
+        setTimeout(detectStart, 100);
     }
+}
 </script>
 <style>
     canvas {
