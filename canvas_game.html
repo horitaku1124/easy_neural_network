@@ -4,97 +4,15 @@
 <meta charset="UTF-8">
 <title>Game</title>
 <script>
-class _DBSCANClustering {
-    // TODO field declaration are not fully supported
-    // inputValues = [];
-    // minNumElements = 2;
-    // epsilon = 1.0;
-    // visitedPoints = new Set(); // should be Set
-    // metric = (a, b) => 0;
-
-    constructor(inputValues, minNumElements, epsilon, metric) {
-        this.inputValues = inputValues;
-        this.minNumElements = minNumElements;
-        this.epsilon = epsilon;
-        this.metric = metric;
-        this.visitedPoints = new Set();
-    }
-
-    getNeighbours(jsonValue) {
-        let verifyValue2 = JSON.parse(jsonValue);
-        let neighbours = [];
-        for (let candidate of this.inputValues) {
-            if (this.metric(verifyValue2, candidate) <= this.epsilon) {
-                neighbours.push(JSON.stringify(candidate));
-            }
-        }
-        return neighbours;
-    }
-
-    static mergeRightToLeftCollection(neighbours1, neighbours2) {
-        for (let tempPt of neighbours2) {
-            if (!neighbours1.includes(tempPt)) {
-                neighbours1.push(tempPt);
-            }
-        }
-        return neighbours1;
-    }
-
-    performClustering() {
-        let resultList = [];
-        this.visitedPoints.clear();
-
-        let neighbours = [];
-        let index = 0;
-        while (this.inputValues.length > index) {
-            let p = this.inputValues[index];
-            let inputValue = JSON.stringify(p);
-            if (!this.visitedPoints.has(inputValue)) {
-                this.visitedPoints.add(inputValue);
-                let neighbours = this.getNeighbours(inputValue);
-
-                if (neighbours.length >= this.minNumElements) {
-                    let ind = 0;
-                    while (neighbours.length > ind) {
-                        let jsonNeighbour = neighbours[ind];
-                        // let jsonNeighbour = JSON.stringify(r);
-                        if (!this.visitedPoints.has(jsonNeighbour)) {
-                            this.visitedPoints.add(jsonNeighbour);
-                            let individualNeighbours = this.getNeighbours(jsonNeighbour);
-                            if (individualNeighbours.length >= this.minNumElements) {
-                                neighbours = DBSCANClustering.mergeRightToLeftCollection(
-                                    neighbours, individualNeighbours)
-                            }
-                        }
-                        ind++
-                    }
-                    resultList.push(neighbours)
-                }
-            }
-            index++
-        }
-        for (let i = 0;i < resultList.length;i++) {
-            let cluster = resultList[i];
-            for (let j = 0;j < cluster.length;j++) {
-                cluster[j] = JSON.parse(cluster[j]);
-            }
-            resultList[i] = cluster;
-        }
-
-        return resultList;
-    }
-}
-
-const metric = (v1, v2) => {
-    return Math.sqrt(Math.pow(v1[0] - v2[0], 2) + Math.pow(v1[1] - v2[1], 2));
-}
-</script>
-<script>
 let mainDisplay;
 let debugDisplay;
 let worker = new Worker('doWork.js');
 let ctx;
 let ctx2;
+let continueAnimation = false;
+function stopAnimation() {
+    continueAnimation = false;
+}
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOMContentLoaded", performance.now());
     mainDisplay = document.getElementById('main_display');
@@ -114,8 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let detectedObjects = [];
     worker.addEventListener('message', function(e) {
-        console.log("worker finished", performance.now() - startedAt, e.data);
-        detectedObjects = e.data
+        detectedObjects = e.data;
+        if (detectedObjects.length > 0) {
+            let timeOfWorker = (performance.now() - startedAt).toFixed(0) + "ms";
+            console.log("worker finished", timeOfWorker, e.data);
+            document.getElementById('debug').innerText = timeOfWorker;
+        }
         detectStart();
     }, false);
 
@@ -125,7 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillStyle = "#FFF";
             ctx.fillRect(0, 0, mainDisplay.width, mainDisplay.height);
             // ctx.stroke();
-            ctx.drawImage(stoneImg, 0, 0, stoneImg.width, stoneImg.height, stoneX, 50, stoneImg.width / 3, stoneImg.height / 3);
+            ctx.drawImage(stoneImg, 0, 0, stoneImg.width, stoneImg.height, stoneX, 10, stoneImg.width / 3, stoneImg.height / 3);
+            ctx.drawImage(stoneImg, 0, 0, stoneImg.width, stoneImg.height, stoneX, 70, stoneImg.width / 3, stoneImg.height / 3);
+            ctx.drawImage(stoneImg, 0, 0, stoneImg.width, stoneImg.height, stoneX, 130, stoneImg.width / 3, stoneImg.height / 3);
+            ctx.drawImage(stoneImg, 0, 0, stoneImg.width, stoneImg.height, stoneX, 190, stoneImg.width / 3, stoneImg.height / 3);
+            ctx.drawImage(stoneImg, 0, 0, stoneImg.width, stoneImg.height, stoneX, 250, stoneImg.width / 3, stoneImg.height / 3);
 
             ctx.stroke();
             stoneX--;
@@ -136,18 +62,21 @@ document.addEventListener('DOMContentLoaded', () => {
             let imageData = ctx.getImageData(0, 0, mainDisplay.width, mainDisplay.height);
             ctx2.putImageData(imageData, 0, 0);
 
-            window.requestAnimationFrame(animationFrame);
             imageData = ctx2.getImageData(0, 0, mainDisplay.width, mainDisplay.height);
             imageDataUint = new Uint8ClampedArray(imageData.data);
 
             for (let [minX, minY, maxX, maxY] of detectedObjects) {
                 ctx2.beginPath();
                 ctx2.strokeStyle = "red";
-                ctx2.rect(minX, minY, maxX - minX, maxY - minY);
+                ctx2.rect(minX * 2, minY * 2, (maxX - minX) * 2, (maxY - minY) * 2);
                 ctx2.stroke();
             }
         }
+        if (continueAnimation) {
+            window.requestAnimationFrame(animationFrame);
+        }
     };
+    continueAnimation = true;
     window.requestAnimationFrame(animationFrame);
     detectStart();
 });
@@ -156,15 +85,42 @@ document.addEventListener('DOMContentLoaded', () => {
 let imageDataUint;
 let startedAt;
 function detectStart() {
-    if (imageDataUint && imageDataUint.length > 0) {
-        worker.postMessage({
-            "imageData": imageDataUint,
-            "width": mainDisplay.width,
-            "height": mainDisplay.height,
-        });
-        startedAt = performance.now();
-    } else {
-        setTimeout(detectStart, 100);
+    if (continueAnimation) {
+        if (imageDataUint && imageDataUint.length > 0) {
+            let width = mainDisplay.width;
+            let height = mainDisplay.height;
+            console.time("pooling");
+            let pooledData = new Uint8ClampedArray(imageDataUint.length / 4);
+            let data = imageDataUint;
+            for (let i = 0; i < data.length; i += 1) {
+                let index = i * 4;
+                pooledData[i] = (data[index] + data[index +1] + data[index +2]) / 3;
+            }
+            let pooledData2 = new Uint8ClampedArray(pooledData.length / 4);
+            let index = 0;
+            for (let y = 0;y < height - 1;y += 2) {
+                let y0 = y * width;
+                for (let x = 0; x < width - 1; x += 2) {
+                    let xx = y0 + x;
+                    let xxx = y0 + width + x;
+                    let value = Math.max(
+                        pooledData[xx], pooledData[xx + 1],
+                        pooledData[xxx], pooledData[xxx + 1],
+                    );
+                    pooledData2[index] = value;
+                    index++;
+                }
+            }
+            worker.postMessage({
+                "imageData": pooledData2,
+                "width": width / 2,
+                "height": height / 2,
+            });
+            startedAt = performance.now();
+            console.timeEnd("pooling");
+        } else {
+            setTimeout(detectStart, 100);
+        }
     }
 }
 </script>
@@ -177,5 +133,7 @@ function detectStart() {
 <body>
 <canvas id="main_display" width="600" height="300"></canvas><br><br>
 <canvas id="debug_display" width="600" height="300"></canvas>
+<span id="debug"></span>
+<input type="button" value="stop" onclick="stopAnimation()">
 </body>
 </html>

@@ -86,36 +86,26 @@ const euclidean = (v1, v2) => {
 
 
 self.addEventListener('message', function(e) {
-  // console.log("start worker", performance.now());
+  // console.time("worker");
   let postData = e.data;
   let data = postData.imageData;
   let inputValues = [];
-  for (let i = 0; i < data.length; i += 4) {
-      let avg = (data[i] + data[i +1] + data[i +2]) / 3;
-      data[i]     = avg; // red
-      data[i + 1] = avg; // green
-      data[i + 2] = avg; // blue
-  }
   for (let y = 0;y < e.data.height - 1;y++) {
       let y0 = y * e.data.width;
       for (let x = 0;x < e.data.width - 1;x++) {
-          let xx = (y0 + x) * 4;
-          let xxx = (y0 + e.data.width + x) * 4;
+          let xx = (y0 + x) * 1;
+          let xxx = (y0 + e.data.width + x) * 1;
           data[xx] = parseInt(Math.abs(
-              data[xx + 4] - data[xx] + data[xxx] - data[xx] + data[xxx + 4] - data[xx]
+              data[xx + 1] - data[xx] + data[xxx] - data[xx] + data[xxx + 1] - data[xx]
           ));
           if (data[xx] > 0.0) {
               inputValues.push([x, y]);
           }
-          data[xx + 1] = data[xx];
-          data[xx + 2] = data[xx + 1];
-          data[xx + 3] = 255;
       }
   }
 
   let dbscan = new DBSCANClustering(inputValues, 2, 1, euclidean);
   let clusters = dbscan.performClustering();
-  // console.log(clusterss);
   let foundPoints = [];
   for (let cluster of clusters) {
       let minX = Number.MAX_VALUE;
@@ -138,6 +128,7 @@ self.addEventListener('message', function(e) {
       }
       foundPoints.push([minX, minY, maxX, maxY]);
   }
+  // console.timeEnd("worker");
 
   self.postMessage(foundPoints);
 }, false);
