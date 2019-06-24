@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Detector</title>
+
+<script>
+let mainDisplay;
+let ctx;
+let worker = new Worker('doWork.js');
+let imageDataUint;
+document.addEventListener('DOMContentLoaded', () => {
+    mainDisplay = document.getElementById('output');
+    ctx = mainDisplay.getContext('2d');
+    let readFile = function(files) {
+        for (let file of files) {
+            console.log(file);
+            let reader = new FileReader();
+            reader.onload = () => {
+                console.log("loaded");
+                let img = new Image();
+                img.src = reader.result;
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, img.width, img.height);
+                    ctx.stroke();
+
+                    let imageData = ctx.getImageData(0, 0, mainDisplay.width, mainDisplay.height);
+                    imageDataUint = new Uint8ClampedArray(imageData.data);
+                    detectStart();
+                };
+
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    document.getElementById('input_file').addEventListener('change', function (evt) {
+        let files = evt.target.files; // FileList object
+        readFile(files);
+    }, false);
+    worker.addEventListener('message', function(e) {
+        detectedObjects = e.data;
+        console.log(detectedObjects);
+        if (detectedObjects.length > 0) {
+            for (let [minX, minY, maxX, maxY] of detectedObjects) {
+                ctx.beginPath();
+                ctx.strokeStyle = "red";
+                ctx.rect(minX * 2, minY * 2, (maxX - minX) * 2, (maxY - minY) * 2);
+                ctx.stroke();
+            }
+        }
+    }, false);
+});
+
+function detectStart() {
+    let width = mainDisplay.width;
+    let height = mainDisplay.height;
+    console.time("pooling");
+    let pooledData = new Uint8ClampedArray(imageDataUint.length / 4);
+    let data = imageDataUint;
+    for (let i = 0; i < data.length; i += 1) {
+        let index = i * 4;
+        pooledData[i] = (data[index] + data[index +1] + data[index +2]) / 3;
+    }
+    let pooledData2 = new Uint8ClampedArray(pooledData.length / 4);
+    let index = 0;
+    for (let y = 0;y < height - 1;y += 2) {
+        let y0 = y * width;
+        for (let x = 0; x < width - 1; x += 2) {
+            let xx = y0 + x;
+            let xxx = y0 + width + x;
+            let value = Math.max(
+                pooledData[xx], pooledData[xx + 1],
+                pooledData[xxx], pooledData[xxx + 1],
+            );
+            pooledData2[index] = value;
+            index++;
+        }
+    }
+    worker.postMessage({
+        "imageData": pooledData2,
+        "width": width / 2,
+        "height": height / 2,
+    });
+    startedAt = performance.now();
+    console.timeEnd("pooling");
+
+}
+</script>
+</head>
+<body>
+    <article>
+        <section class="input_box">
+            <input id="input_file" type="file">
+        </section>
+
+        <canvas id="output" width="600" height="300"></canvas>
+    </article>
+</body>
+</html>
