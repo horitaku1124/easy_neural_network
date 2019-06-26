@@ -8,12 +8,16 @@
 
 <script>
 let mainDisplay;
+let debugDisplay;
 let ctx;
+let ctx2;
 let worker = new Worker('doWork.js');
 let imageDataUint;
 document.addEventListener('DOMContentLoaded', () => {
     mainDisplay = document.getElementById('output');
+    debugDisplay = document.getElementById('debug1');
     ctx = mainDisplay.getContext('2d');
+    ctx2 = debugDisplay.getContext('2d');
     let readFile = function(files) {
         for (let file of files) {
             console.log(file);
@@ -86,6 +90,30 @@ function detectStart() {
     startedAt = performance.now();
     console.timeEnd("pooling");
 
+
+
+
+    let data2 = imageDataUint;
+    let width2 = width;
+    let height2 = height;
+
+
+    var imgData = ctx2.getImageData(0, 0, width2, height2);
+    for (let y = 0;y < height2 - 1;y++) {
+        let y0 = y * width2;
+        for (let x = 0;x < width2 - 1;x++) {
+            let xx = (y0 + x) * 1;
+            let xxx = (y0 + width2 + x) * 1;
+            let xxxx = xx * 1;
+            // imgData.data[xxxx] = parseInt(Math.abs(
+            //     data2[xx + 1] - data2[xx] + data2[xxx] - data2[xx] + data2[xxx + 1] - data2[xx]
+            // ));
+            imgData.data[xxxx + 0] = data2[xx];
+            imgData.data[xxxx + 1] = data2[xx + 1];
+            imgData.data[xxxx + 2] = data2[xx + 2];
+        }
+    }
+    ctx2.putImageData(imgData, 0, 0);
 }
 </script>
 </head>
@@ -96,6 +124,7 @@ function detectStart() {
         </section>
 
         <canvas id="output" width="600" height="300"></canvas>
+        <canvas id="debug1" width="600" height="300"></canvas>
     </article>
 </body>
 </html>
