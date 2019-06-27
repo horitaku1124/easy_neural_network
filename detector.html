@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         readFile(files);
     }, false);
     worker.addEventListener('message', function(e) {
+        console.timeEnd("detection");
         detectedObjects = e.data;
         console.log(detectedObjects);
         if (detectedObjects.length > 0) {
@@ -82,20 +83,11 @@ function detectStart() {
             index++;
         }
     }
-    worker.postMessage({
-        "imageData": pooledData2,
-        "width": width / 2,
-        "height": height / 2,
-    });
-    startedAt = performance.now();
     console.timeEnd("pooling");
 
-
-
-
-    let data2 = imageDataUint;
-    let width2 = width;
-    let height2 = height;
+    let data2 = pooledData2;
+    let width2 = width / 2;
+    let height2 = height / 2;
 
 
     var imgData = ctx2.getImageData(0, 0, width2, height2);
@@ -104,16 +96,24 @@ function detectStart() {
         for (let x = 0;x < width2 - 1;x++) {
             let xx = (y0 + x) * 1;
             let xxx = (y0 + width2 + x) * 1;
-            let xxxx = xx * 1;
-            // imgData.data[xxxx] = parseInt(Math.abs(
-            //     data2[xx + 1] - data2[xx] + data2[xxx] - data2[xx] + data2[xxx + 1] - data2[xx]
-            // ));
-            imgData.data[xxxx + 0] = data2[xx];
-            imgData.data[xxxx + 1] = data2[xx + 1];
-            imgData.data[xxxx + 2] = data2[xx + 2];
+            let xxxx = xx * 4;
+            let dot = parseInt(Math.abs(
+                data2[xx + 1] - data2[xx] + data2[xxx] - data2[xx] + data2[xxx + 1] - data2[xx]
+            ));
+            imgData.data[xxxx + 0] = dot;
+            imgData.data[xxxx + 1] = dot;
+            imgData.data[xxxx + 2] = dot;
+            imgData.data[xxxx + 3] = 255;
         }
     }
     ctx2.putImageData(imgData, 0, 0);
+
+    worker.postMessage({
+        "imageData": pooledData2,
+        "width": width / 2,
+        "height": height / 2,
+    });
+    console.time("detection");
 }
 </script>
 </head>
