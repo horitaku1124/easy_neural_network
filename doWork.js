@@ -11,19 +11,9 @@ class DBSCANClustering {
     this.inputValues = inputValues;
     this.minNumElements = minNumElements;
     this.epsilon = epsilon;
+    this.epsilon2 = Math.pow(epsilon, 2);
     this.metric = metric;
     this.visitedPoints = new Set();
-  }
-
-  getNeighbours(jsonValue) {
-    let verifyValue2 = JSON.parse(jsonValue);
-    let neighbours = [];
-    for (let candidate of this.inputValues) {
-      if (this.metric(verifyValue2, candidate) <= this.epsilon) {
-        neighbours.push(JSON.stringify(candidate));
-      }
-    }
-    return neighbours;
   }
 
   static mergeRightToLeftCollection(neighbours1, neighbours2) {
@@ -35,53 +25,59 @@ class DBSCANClustering {
     return neighbours1;
   }
 
+  getNeighbours(index) {
+    let verifyValue2 = this.inputValues[index];
+    let neighbours = [];
+
+    for (let i = 0;i < this.inputValues.length;i++) {
+      let candidate = this.inputValues[i];
+      if (this.metric(verifyValue2, candidate) <= this.epsilon2) {
+        neighbours.push(i);
+      }
+    }
+    return neighbours;
+  }
+
   performClustering() {
     let resultList = [];
     this.visitedPoints.clear();
 
     let neighbours = [];
-    let index = 0;
-    while (this.inputValues.length > index) {
-      let p = this.inputValues[index];
-      let inputValue = JSON.stringify(p);
-      if (!this.visitedPoints.has(inputValue)) {
-        this.visitedPoints.add(inputValue);
-        let neighbours = this.getNeighbours(inputValue);
+    this.inputValues.forEach((_, index) => {
+      if (this.visitedPoints.has(index)) {
+        return;
+      }
+      this.visitedPoints.add(index);
+      let neighbours = this.getNeighbours(index);
 
-        if (neighbours.length >= this.minNumElements) {
-          let ind = 0;
-          while (neighbours.length > ind) {
-            let jsonNeighbour = neighbours[ind];
-            // let jsonNeighbour = JSON.stringify(r);
-            if (!this.visitedPoints.has(jsonNeighbour)) {
-              this.visitedPoints.add(jsonNeighbour);
-              let individualNeighbours = this.getNeighbours(jsonNeighbour);
-              if (individualNeighbours.length >= this.minNumElements) {
-                neighbours = DBSCANClustering.mergeRightToLeftCollection(
-                    neighbours, individualNeighbours)
-              }
-            }
-            ind++
-          }
-          resultList.push(neighbours)
+      if (neighbours.length < this.minNumElements) {
+        return;
+      }
+
+      for (let ind = 0;ind < neighbours.length;ind++) {
+        let jsonNeighbour = neighbours[ind];
+        if (this.visitedPoints.has(jsonNeighbour)) {
+          continue;
+        }
+        this.visitedPoints.add(jsonNeighbour);
+        let individualNeighbours = this.getNeighbours(jsonNeighbour);
+        if (individualNeighbours.length >= this.minNumElements) {
+          neighbours = DBSCANClustering.mergeRightToLeftCollection(
+              neighbours, individualNeighbours)
         }
       }
-      index++
-    }
-    for (let i = 0;i < resultList.length;i++) {
-      let cluster = resultList[i];
-      for (let j = 0;j < cluster.length;j++) {
-        cluster[j] = JSON.parse(cluster[j]);
-      }
-      resultList[i] = cluster;
-    }
+      resultList.push(neighbours)
+    });
 
-    return resultList;
+    return resultList.map(cluster => cluster.map(i => this.inputValues[i]));
   }
 }
 
 const euclidean = (v1, v2) => {
-  return Math.sqrt(Math.pow(v1[0] - v2[0], 2) + Math.pow(v1[1] - v2[1], 2));
+  let d0 = v1[0] - v2[0];
+  let d1 = v1[1] - v2[1];
+  // return Math.sqrt(d0 * d0 + d1 * d1);
+  return (d0 * d0 + d1 * d1);
 }
 
 
@@ -104,7 +100,7 @@ self.addEventListener('message', function(e) {
       }
   }
 
-  let dbscan = new DBSCANClustering(inputValues, 2, 1, euclidean);
+  let dbscan = new DBSCANClustering(inputValues, 3, 1, euclidean);
   let clusters = dbscan.performClustering();
   let foundPoints = [];
   for (let cluster of clusters) {

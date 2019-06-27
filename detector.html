@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 img.src = reader.result;
                 img.onload = () => {
                     ctx.drawImage(img, 0, 0, img.width, img.height);
-                    ctx.stroke();
 
                     let imageData = ctx.getImageData(0, 0, mainDisplay.width, mainDisplay.height);
                     imageDataUint = new Uint8ClampedArray(imageData.data);
