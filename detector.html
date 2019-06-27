@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
     worker.addEventListener('message', function(e) {
         console.timeEnd("detection");
-        detectedObjects = e.data;
+        let detectedObjects = e.data;
         console.log(detectedObjects);
         if (detectedObjects.length > 0) {
             for (let [minX, minY, maxX, maxY] of detectedObjects) {
