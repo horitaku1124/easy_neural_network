@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
 <title>Detector</title>
-
+<script type="module" >
+    import {ImageResize} from './image_resize.mjs';
+    window.ImageResize = ImageResize;
+</script>
 <script>
 let mainDisplay;
 let debugDisplay;
@@ -13,7 +16,10 @@ let ctx;
 let ctx2;
 let worker = new Worker('doWork.js');
 let imageDataUint;
+const PoolingScale = 2;
+let ImageResize;
 document.addEventListener('DOMContentLoaded', () => {
+    ImageResize = window.ImageResize;
     mainDisplay = document.getElementById('output');
     debugDisplay = document.getElementById('debug1');
     ctx = mainDisplay.getContext('2d');
@@ -50,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let [minX, minY, maxX, maxY] of detectedObjects) {
                 ctx.beginPath();
                 ctx.strokeStyle = "red";
-                ctx.rect(minX * 2, minY * 2, (maxX - minX) * 2, (maxY - minY) * 2);
+                ctx.rect(minX * PoolingScale, minY * PoolingScale, (maxX - minX) * PoolingScale, (maxY - minY) * PoolingScale);
                 ctx.stroke();
             }
         }
@@ -61,33 +67,13 @@ function detectStart() {
     let width = mainDisplay.width;
     let height = mainDisplay.height;
     console.time("pooling");
-    let pooledData = new Uint8ClampedArray(imageDataUint.length / 4);
-    let data = imageDataUint;
-    for (let i = 0; i < data.length; i += 1) {
-        let index = i * 4;
-        pooledData[i] = (data[index] + data[index +1] + data[index +2]) / 3;
-    }
-    let pooledData2 = new Uint8ClampedArray(pooledData.length / 4);
-    let index = 0;
-    for (let y = 0;y < height - 1;y += 2) {
-        let y0 = y * width;
-        for (let x = 0; x < width - 1; x += 2) {
-            let xx = y0 + x;
-            let xxx = y0 + width + x;
-            let value = Math.max(
-                pooledData[xx], pooledData[xx + 1],
-                pooledData[xxx], pooledData[xxx + 1],
-            );
-            pooledData2[index] = value;
-            index++;
-        }
-    }
+    let pooledData = ImageResize.monoColor(imageDataUint);
+    let pooledData3 = ImageResize.maxPoolingMono(pooledData, width, height, PoolingScale);
     console.timeEnd("pooling");
 
-    let data2 = pooledData2;
-    let width2 = width / 2;
-    let height2 = height / 2;
-
+    let data2 = pooledData3;
+    let width2 = width / PoolingScale;
+    let height2 = height / PoolingScale;
 
     var imgData = ctx2.getImageData(0, 0, width2, height2);
     for (let y = 0;y < height2 - 1;y++) {
@@ -108,9 +94,9 @@ function detectStart() {
     ctx2.putImageData(imgData, 0, 0);
 
     worker.postMessage({
-        "imageData": pooledData2,
-        "width": width / 2,
-        "height": height / 2,
+        "imageData": pooledData3,
+        "width": width / PoolingScale,
+        "height": height / PoolingScale,
     });
     console.time("detection");
 }
