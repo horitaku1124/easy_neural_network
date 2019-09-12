@@ -94,7 +94,7 @@ self.addEventListener('message', function(e) {
           data[xx] = parseInt(Math.abs(
               data[xx + 1] - data[xx] + data[xxx] - data[xx] + data[xxx + 1] - data[xx]
           ));
-          if (data[xx] > 0.0) {
+          if (data[xx] > 10.0) {
               inputValues.push([x, y]);
           }
       }
