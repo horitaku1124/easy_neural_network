@@ -1,6 +1,6 @@
 
 ```
-python -m http.server 8000
+python3 http_server.py
 ```
 
 `irasutoya/*` images rights are いらすとや
