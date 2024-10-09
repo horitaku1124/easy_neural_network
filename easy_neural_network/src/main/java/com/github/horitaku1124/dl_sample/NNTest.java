@@ -32,9 +32,9 @@ public class NNTest {
         middleLayer2.update(eta);
         outputLayer.update(eta);
     }
-    private static float getError(MyNumArray t, int batch_size) {
-        return MyNumArray.sum(t * )
-    }
+//    private static float getError(MyNumArray t, int batch_size) {
+//        return MyNumArray.sum(t * )
+//    }
 
     public static void main(String[] args) throws IOException {
         MyNumArray irisImageData;
@@ -109,9 +109,9 @@ public class NNTest {
             MyNumArray.rand().shuffle(indexRandom);
 
             // -- 経過の表示 --
-            if (i % interval == 0) {
-                System.out.format("Epoch:%d/%d Error_train: %f Error_test:", error_train, error_test);
-            }
+//            if (i % interval == 0) {
+//                System.out.format("Epoch:%d/%d Error_train: %f Error_test:", error_train, error_test);
+//            }
             for (int j = 0;j < n_batch;j++) {
                 ArrayWarp mb_index = new ArrayWarp(indexRandom, j * batch_size, (j + 1) * batch_size);
                 WarpMyNumArray x = new WarpMyNumArray(inputTrain, mb_index);
