@@ -1,9 +1,31 @@
 package com.github.horitaku1124.util;
 
-import lombok.Data;
 
-@Data
 public class ArrayWarp {
+  public int[] getArray() {
+    return array;
+  }
+
+  public void setArray(int[] array) {
+    this.array = array;
+  }
+
+  public int getStart() {
+    return start;
+  }
+
+  public void setStart(int start) {
+    this.start = start;
+  }
+
+  public int getStop() {
+    return stop;
+  }
+
+  public void setStop(int stop) {
+    this.stop = stop;
+  }
+
   private int[] array;
   private int start;
   private int stop;

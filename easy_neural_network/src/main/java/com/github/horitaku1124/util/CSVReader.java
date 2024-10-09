@@ -33,6 +33,7 @@ public class CSVReader implements Closeable {
             if (line == null) {
                 break;
             }
+            line = line.replaceAll("\"", "");
             if (num != header - 1) {
                 data.add(function.apply(line));
             }

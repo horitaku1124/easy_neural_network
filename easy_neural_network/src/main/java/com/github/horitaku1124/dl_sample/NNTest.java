@@ -39,7 +39,7 @@ public class NNTest {
     public static void main(String[] args) throws IOException {
         MyNumArray irisImageData;
         MyNumArray irisLabelData;
-        try(CSVReader csvReader = new CSVReader("./iris.csv", 1);) {
+        try(CSVReader csvReader = new CSVReader("./src/main/resources/iris.csv", 1);) {
             irisImageData = csvReader.readToMuyNum(s -> {
                 String[] line = s.split(",");
                 return new Float[]{
@@ -51,7 +51,7 @@ public class NNTest {
             });
             irisImageData.printLayer(0);
         }
-        try(CSVReader csvReader = new CSVReader("./iris.csv", 1);) {
+        try(CSVReader csvReader = new CSVReader("./src/main/resources/iris.csv", 1);) {
             irisLabelData = csvReader.readToMuyNum(s -> {
                 String[] line = s.split(",");
                 Float[] correct = new Float[3];
